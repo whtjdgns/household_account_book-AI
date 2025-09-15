@@ -7,47 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="styleing.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: #f3f4f6;
-            color: #1f2937;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .dark-mode {
-            background-color: #1f2937;
-            color: #f3f4f6;
-        }
-        .dark-mode .bg-white, .dark-mode .card { background-color: #374151; }
-        .dark-mode .text-gray-600 { color: #d1d5db; }
-        .dark-mode .text-gray-800 { color: #f3f4f6; }
-        .dark-mode .border-gray-200 { border-color: #4b5563; }
-        .card {
-            background-color: white;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15);
-        }
-        .chart-container {
-            position: relative;
-            height: 300px;
-        }
-        input[type="number"]::-webkit-outer-spin-button,
-        input[type="number"]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        .nav-link.active {
-            color: #4f46e5;
-            font-weight: bold;
-        }
-    </style>
+    
 </head>
 <body class="bg-gray-100 dark-mode-aware">
 
@@ -150,7 +112,7 @@
             <div class="w-full max-w-lg bg-white card p-8 space-y-6">
                 <h1 class="text-3xl font-bold text-center text-gray-800">거래 기록하기</h1>
                 <p class="text-center text-gray-600">AI가 당신의 기록을 스마트하게 분류해 드려요.</p>
-        
+                
                 <!-- Income/Expense Toggle -->
                 <div class="flex rounded-full bg-gray-200 p-1">
                     <button id="expense-btn" class="flex-1 py-2 px-4 rounded-full font-bold text-gray-800 bg-white shadow-md">지출</button>
