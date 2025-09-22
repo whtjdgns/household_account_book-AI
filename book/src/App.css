@@ -1,38 +1,55 @@
-.App {
-  text-align: center;
+/* src/index.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ▼▼▼▼▼ 이 아래에 커스텀 CSS 추가 ▼▼▼▼▼ */
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background-color: #f3f4f6; /* [cite: 2] */
+    color: #1f2937; /* [cite: 2] */
+    transition: background-color 0.3s, color 0.3s;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.dark-mode {
+    background-color: #1f2937; /* [cite: 2] */
+    color: #f3f4f6; /* [cite: 3] */
 }
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.dark-mode .bg-white, .dark-mode .card {
+    background-color: #374151; /* [cite: 3] */
 }
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.dark-mode .text-gray-600 {
+    color: #d1d5db; /* [cite: 4] */
 }
-
-.App-link {
-  color: #61dafb;
+.dark-mode .text-gray-800 {
+    color: #f3f4f6; /* [cite: 5] */
 }
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.dark-mode .border-gray-200 {
+    border-color: #4b5563; /* [cite: 6] */
+}
+.card {
+    background-color: white; /* [cite: 7] */
+    border-radius: 1rem; /* [cite: 8] */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease; /* [cite: 8] */
+}
+.card:hover {
+    transform: translateY(-5px); /* [cite: 9] */
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15); /* [cite: 10] */
+}
+.chart-container {
+    position: relative;
+    height: 300px; /* [cite: 11] */
+}
+/* 숫자 입력 필드의 스핀 버튼 숨기기 */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0; /* [cite: 12] */
+}
+.nav-link.active {
+    color: #4f46e5;
+    font-weight: bold; /* [cite: 13] */
 }
