@@ -30,7 +30,6 @@ function Header({ showPage, toggleDarkMode, currentPage }) {
         >
           <i className="fas fa-chart-line mr-2"></i>보고서</a>
 
-
         {/* 설정 */}
          <a 
           href="#" 
@@ -38,7 +37,6 @@ function Header({ showPage, toggleDarkMode, currentPage }) {
           className={`nav-link ${currentPage === 'settings' ? 'active' : ''}`}
         >
           <i className="fas fa-exchange-alt mr-2"></i>설정</a>
-
 
          {/* ... (기타 네비게이션 링크) ... */}
       </nav>

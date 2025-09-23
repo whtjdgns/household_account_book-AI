@@ -23,7 +23,7 @@ function Dashboard({ isDarkMode }) {
             <p className="text-sm text-gray-500 mb-2">이번 달 지출</p>
             <h3 className="text-3xl font-bold text-red-500">-₩500,000</h3>
         </Card>
-
+      
         {/* 👇 [추가] 예산 대비 카드 */}
         <Card>
           <p className="text-sm text-gray-500 mb-2">예산 대비</p>
