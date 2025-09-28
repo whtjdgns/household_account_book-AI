@@ -2,63 +2,68 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-// props로 로그인 성공 함수와 회원가입 페이지 전환 함수를 받음
 function LoginPage({ onLoginSuccess, onSwitchToRegister }) {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
 
     const handleLogin = async (e) => {
         e.preventDefault();
         setError('');
-
         try {
-            // 백엔드의 로그인 API 호출 (이 API는 다음 단계에서 만들어야 합니다!)
+            // 백엔드의 로그인 API 호출
             const response = await axios.post('http://localhost:5000/api/users/login', {
-                username,
+                username: email, // 아이디를 이메일로 사용
                 password
             });
-            
-            // 로그인 성공 시, 서버로부터 받은 토큰을 저장
             localStorage.setItem('authToken', response.data.token);
-            onLoginSuccess(); // App.js에 로그인 성공을 알림
-
+            onLoginSuccess();
         } catch (err) {
-            if (err.response && err.response.data) {
-                setError(err.response.data.message);
-            } else {
-                setError('로그인 중 오류가 발생했습니다.');
-            }
+            setError(err.response?.data?.message || '로그인 중 오류가 발생했습니다.');
         }
     };
 
     return (
-        <main className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-            <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 space-y-6">
-                <div className="text-center">
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div className="w-full max-w-md bg-white rounded-lg shadow-md p-8">
+                <div className="text-center mb-8">
                     <h1 className="text-3xl font-bold text-gray-800">로그인</h1>
+                    <p className="mt-2 text-gray-600">스마트 가계부 서비스를 이용해 보세요.</p>
                 </div>
                 <form onSubmit={handleLogin} className="space-y-6">
                     <div>
-                        <label /* ... */ >아이디</label>
-                        <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required className="block w-full text-lg rounded-lg border-transparent bg-gray-100 p-3" />
+                        <label className="block text-sm font-medium text-gray-700">이메일 주소</label>
+                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
                     </div>
                     <div>
-                        <label /* ... */ >비밀번호</label>
-                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="block w-full text-lg rounded-lg border-transparent bg-gray-100 p-3" />
+                        <label className="block text-sm font-medium text-gray-700">비밀번호</label>
+                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
                     </div>
-
-                    {error && <p className="text-red-500 text-center">{error}</p>}
-
-                    <button type="submit" className="w-full py-3 px-4 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700">
+                    {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+                    <button type="submit" className="w-full py-3 px-4 bg-indigo-600 text-white font-bold rounded-md hover:bg-indigo-700">
                         로그인
                     </button>
                 </form>
-                <p className="text-center text-sm text-gray-600">
+                <div className="my-6 flex items-center justify-center">
+                    <div className="border-t border-gray-300 flex-grow"></div>
+                    <span className="px-4 text-gray-500 text-sm">또는</span>
+                    <div className="border-t border-gray-300 flex-grow"></div>
+                </div>
+                <div className="space-y-4">
+                    <button className="w-full py-3 px-4 flex justify-center items-center bg-[#EA4335] text-white font-bold rounded-md hover:bg-[#d93025]">
+                        <svg className="w-5 h-5 mr-2" /* ... Google Icon SVG */ > ... </svg>
+                        구글로 로그인
+                    </button>
+                    <button className="w-full py-3 px-4 flex justify-center items-center bg-[#03C75A] text-white font-bold rounded-md hover:bg-[#02b350]">
+                         <svg className="w-5 h-5 mr-2" /* ... Naver Icon SVG */ > ... </svg>
+                        네이버로 로그인
+                    </button>
+                </div>
+                <p className="mt-8 text-center text-sm text-gray-600">
                     계정이 없으신가요? <button onClick={onSwitchToRegister} className="font-medium text-indigo-600 hover:text-indigo-500">회원가입</button>
                 </p>
             </div>
-        </main>
+        </div>
     );
 }
 
