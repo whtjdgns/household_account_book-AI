@@ -1,39 +1,79 @@
+// src/App.js
 import React, { useState, useEffect } from 'react';
+import { jwtDecode } from 'jwt-decode';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
-import TransactionPage from './components/TransactionPage';
 import ReportPage from './components/ReportPage';
 import SettingsPage from './components/SettingsPage';
 import LoginPage from './Login/LoginPage';
 import RegisterPage from './Login/RegisterPage';
-import './App.css'; // TailwindCSS를 포함한 CSS 파일
+import TransactionModal from './components/TransactionModal';
+import MyPage from './components/MyPage';
+import './App.css';
 
 function App() {
-  const [authPage, setAuthPage] = useState('login');
-  const [currentPage, setCurrentPage] = useState('dashboard');
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); 
+    // --- 1. 모든 state와 함수를 맨 위에 정의합니다. ---
+    
+    // 페이지 및 상태 관리
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [user, setUser] = useState(null);
+    const [currentPage, setCurrentPage] = useState('dashboard');
+    const [authPage, setAuthPage] = useState('login');
+    const [isDarkMode, setIsDarkMode] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    if (isDarkMode) {
-      document.body.classList.add('dark-mode');
-    } else {
-      document.body.classList.remove('dark-mode');
-    }
-  }, [isDarkMode]);
+    // 헬퍼 함수
+    const openModal = () => setIsModalOpen(true);
+    const closeModal = () => setIsModalOpen(false);
+    const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
+    const showPage = (page) => setCurrentPage(page);
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
+    // 로그인 성공 시 호출될 함수
+    const onLoginSuccess = () => {
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            const decodedUser = jwtDecode(token);
+            setUser(decodedUser);
+            setIsLoggedIn(true);
+        }
+    };
 
-  const showPage = (page) => {
-    setCurrentPage(page);
-  };
+    // 로그아웃 함수
+    const handleLogout = () => {
+        localStorage.removeItem('authToken');
+        setUser(null);
+        setIsLoggedIn(false);
+    };
 
-  if (!isLoggedIn) {
+    // --- 2. 모든 useEffect를 이어서 정의합니다. ---
+
+    // 다크 모드 적용 Effect
+    useEffect(() => {
+        if (isDarkMode) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
+    }, [isDarkMode]);
+
+    // 앱 첫 로드 시 자동 로그인 처리 Effect
+    useEffect(() => {
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            const decodedUser = jwtDecode(token);
+            setUser(decodedUser);
+            setIsLoggedIn(true);
+        }
+    }, []);
+
+
+    // --- 3. 마지막에 return 로직을 한 번만 사용합니다. ---
+
+    // 로그인 상태가 아니라면, 로그인 또는 회원가입 페이지를 보여줌
+    if (!isLoggedIn) {
         if (authPage === 'login') {
             return <LoginPage 
-                        onLoginSuccess={() => setIsLoggedIn(true)} 
+                        onLoginSuccess={onLoginSuccess} 
                         onSwitchToRegister={() => setAuthPage('register')} 
                     />;
         } else {
@@ -43,22 +83,26 @@ function App() {
         }
     }
     
+    // 로그인 상태라면, 메인 가계부 앱을 보여줌
+    return (
+        <div className={`min-h-screen flex flex-col p-4 md:p-8 ${isDarkMode ? 'dark-mode' : ''}`}>
+            <Header
+                user={user}
+                handleLogout={handleLogout}
+                showPage={showPage}
+                toggleDarkMode={toggleDarkMode}
+                currentPage={currentPage}
+                onOpenModal={openModal}
+            />
 
-  return (
-    <div className={`min-h-screen flex flex-col p-4 md:p-8 ${isDarkMode ? 'dark-mode' : ''}`}>
-     {/* 대쉬보드로 현제 페이지가 무엇인지 설정값 넘기는 부분  */}
-     
-      <Header
-        showPage={showPage}
-        toggleDarkMode={toggleDarkMode}
-        currentPage={currentPage}
-      />
-      {currentPage === 'dashboard' && <Dashboard isDarkMode={isDarkMode} />}
-      {currentPage === 'transaction' && <TransactionPage />}
-      {currentPage === 'report' && <ReportPage />}
-      {currentPage === 'settings' && <SettingsPage />}
-    </div>
-  );
+            {currentPage === 'dashboard' && <Dashboard isDarkMode={isDarkMode} />}
+            {currentPage === 'report' && <ReportPage />}
+            {currentPage === 'settings' && <SettingsPage />}
+            {currentPage === 'mypage' && <MyPage user={user} />}
+            
+            <TransactionModal isOpen={isModalOpen} onClose={closeModal} />
+        </div>
+    );
 }
 
 export default App;
