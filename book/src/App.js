@@ -9,6 +9,7 @@ import LoginPage from './Login/LoginPage';
 import RegisterPage from './Login/RegisterPage';
 import TransactionModal from './components/TransactionModal';
 import MyPage from './components/MyPage';
+import axios from 'axios';
 import './App.css';
 
 function App() {
@@ -21,6 +22,30 @@ function App() {
     const [authPage, setAuthPage] = useState('login');
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [transactions, setTransactions] = useState([]); 
+
+    // 서버에서 거래내역 불러오기 
+    const fetchTransactions = async () => {
+        try {
+            const token = localStorage.getItem('authToken');
+            const response = await axios.get('http://localhost:5000/api/transactions', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setTransactions(response.data);
+        } catch (error) {
+            console.error("거래 내역 로딩 실패:", error);
+        }
+    };
+
+
+
+    // 로그인 했을 때 거래 내역을 한 번 불러옴
+    useEffect(() => {
+        if (isLoggedIn) {
+            fetchTransactions();
+        }
+    }, [isLoggedIn]);
+
 
     // 헬퍼 함수
     const openModal = () => setIsModalOpen(true);
@@ -95,12 +120,20 @@ function App() {
                 onOpenModal={openModal}
             />
 
-            {currentPage === 'dashboard' && <Dashboard isDarkMode={isDarkMode} />}
+              {/* Dashboard에 transactions 데이터 전달 */}
+            {currentPage === 'dashboard' && <Dashboard isDarkMode={isDarkMode} transactions={transactions} />}
+            
             {currentPage === 'report' && <ReportPage />}
             {currentPage === 'settings' && <SettingsPage />}
             {currentPage === 'mypage' && <MyPage user={user} />}
+
+             <TransactionModal 
+                isOpen={isModalOpen} 
+                onClose={closeModal} 
+                onSaveSuccess={fetchTransactions} 
+            />
             
-            <TransactionModal isOpen={isModalOpen} onClose={closeModal} />
+            
         </div>
     );
 }

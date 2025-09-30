@@ -89,6 +89,59 @@ app.post('/api/users/login', async (req, res) => {
     }
 });
 
+app.get('/api/transactions', async (req, res) => {
+    try {
+        // 1. 요청 헤더에서 토큰 가져오기
+        const token = req.headers.authorization.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: '인증 토큰이 없습니다.' });
+        }
+
+        // 2. 토큰 검증 및 사용자 정보 확인
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.id;
+
+        // 3. 해당 사용자의 거래 내역만 조회
+        const sql = 'SELECT * FROM transactions WHERE user_id = ? ORDER BY transaction_date DESC';
+        const [transactions] = await db.query(sql, [userId]);
+
+        res.status(200).json(transactions);
+    } catch (error) {
+        console.error(error);
+        // 토큰 만료 또는 변조 시
+        if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+             return res.status(401).json({ message: '유효하지 않은 토큰입니다.' });
+        }
+        res.status(500).json({ message: '서버 에러가 발생했습니다.' });
+    }
+});
+
+app.post('/api/transactions', async (req, res) => {
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: '인증 토큰이 없습니다.' });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.id;
+
+        const { type, amount, description, category } = req.body;
+
+        const sql = 'INSERT INTO transactions (user_id, type, amount, description, category) VALUES (?, ?, ?, ?, ?)';
+        await db.query(sql, [userId, type, amount, description, category]);
+
+        res.status(201).json({ message: '거래가 성공적으로 기록되었습니다.' });
+
+    } catch (error) {
+        console.error(error);
+         if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+             return res.status(401).json({ message: '유효하지 않은 토큰입니다.' });
+        }
+        res.status(500).json({ message: '서버 에러가 발생했습니다.' });
+    }
+});
+
 // ## 이메일 인증번호 발송 API ##
 app.post('/api/email/send-verification', async (req, res) => {
     const { email } = req.body;

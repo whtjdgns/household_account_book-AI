@@ -13,7 +13,7 @@ function Header({ user, handleLogout, showPage, currentPage, toggleDarkMode, onO
             <h1 className="text-2xl font-bold text-indigo-600 mb-4 md:mb-0">스마트 가계부</h1>
             <nav className="flex-grow flex justify-center space-x-4 md:space-x-8">
                 <a href="#" onClick={() => showPage('dashboard')} className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`}>
-                    <i className="fas fa-chart-line mr-2"></i>대시보-드
+                    <i className="fas fa-chart-line mr-2"></i>대시보드
                 </a>
                 <button onClick={onOpenModal} className="nav-link text-gray-600 hover:text-indigo-600 font-medium transition-colors">
                     <i className="fas fa-exchange-alt mr-2"></i>거래 기록

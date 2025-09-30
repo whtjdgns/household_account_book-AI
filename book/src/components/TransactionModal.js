@@ -1,89 +1,128 @@
 // src/components/TransactionModal.js
 import React, { useState } from 'react';
+import axios from 'axios';
 
-function TransactionModal({ isOpen, onClose }) {
+function TransactionModal({ isOpen, onClose, onSaveSuccess }) {
+    // 폼 입력 값을 위한 state 변수들
     const [transactionType, setTransactionType] = useState('expense');
+    const [amount, setAmount] = useState('');
+    const [description, setDescription] = useState('');
+    const [category, setCategory] = useState('');
+    const [error, setError] = useState(''); // 에러 메시지 state
 
     // 모달이 열려있지 않으면 아무것도 렌더링하지 않음
     if (!isOpen) return null;
+
+    // 폼 제출 핸들러
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        try {
+            const token = localStorage.getItem('authToken');
+            
+            await axios.post('http://localhost:5000/api/transactions', {
+                type: transactionType,
+                amount: Number(amount),
+                description: description,
+                category: category,
+            }, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            alert('거래가 기록되었습니다!');
+            onSaveSuccess(); // 대시보드 데이터 새로고침
+            
+            // 성공 시 폼 초기화 및 모달 닫기
+            setAmount('');
+            setDescription('');
+            setCategory('');
+            onClose(); 
+
+        } catch (err) {
+            setError(err.response?.data?.message || '거래 기록에 실패했습니다.');
+            console.error('거래 기록 실패:', err);
+        }
+    };
 
     return (
         // 1. 모달 배경 (Overlay)
         <div 
             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-            onClick={onClose} // 배경 클릭 시 모달 닫기
+            onClick={onClose}
         >
             {/* 2. 모달 컨텐츠 */}
             <div 
                 className="w-full max-w-lg bg-white rounded-2xl shadow-xl p-8 space-y-6 relative"
-                onClick={(e) => e.stopPropagation()} // 컨텐츠 클릭 시 닫히는 것 방지
+                onClick={(e) => e.stopPropagation()}
             >
-                {/* 닫기 버튼 */}
                 <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl">
                     &times;
                 </button>
                 
-                {/* 기존 TransactionPage의 내용 (제목, 토글, 폼) */}
-                
-                <div className="w-full max-w-lg bg-white  rounded-2xl shadow-xl p-8 space-y-6">
-                
-                {/* 제목 */}
                 <div className="text-center">
                     <h1 className="text-3xl font-bold text-gray-800">거래 기록하기</h1>
-                    <p className="mt-2 text-gray-900 ">AI가 당신의 기록을 스마트하게 분류해 드려요.</p>
+                    <p className="mt-2 text-gray-600">AI가 당신의 기록을 스마트하게 분류해 드려요.</p>
                 </div>
-        
-                {/* 지출/수입 토글 버튼 */}
-                <div className="flex rounded-full bg-gray-100 dark:bg-gray-200 p-1">
+                
+                <div className="flex rounded-full bg-gray-100 p-1">
                     <button 
+                        type="button" // form 안의 button은 type="button"을 명시해야 submit을 방지합니다.
                         onClick={() => setTransactionType('expense')} 
-                        className={`flex-1 py-2 px-4 rounded-full font-bold transition-colors duration-300 ${transactionType === 'expense' ? 'bg-white dark:bg-gray-600 shadow-md text-gray-600 dark:text-white' : 'text-gray-500'}`}
+                        className={`flex-1 py-2 px-4 rounded-full font-bold transition-colors duration-300 ${transactionType === 'expense' ? 'bg-white shadow-md text-gray-800' : 'text-gray-500'}`}
                     >
                         지출
                     </button>
                     <button 
+                        type="button"
                         onClick={() => setTransactionType('income')} 
-                        className={`flex-1 py-2 px-4 rounded-full font-bold transition-colors duration-300 ${transactionType === 'income' ? 'bg-white dark:bg-gray-600 shadow-md text-gray-600 dark:text-white' : 'text-gray-500'}`}
+                        className={`flex-1 py-2 px-4 rounded-full font-bold transition-colors duration-300 ${transactionType === 'income' ? 'bg-white shadow-md text-gray-800' : 'text-gray-500'}`}
                     >
                         수입
                     </button>
                 </div>
         
-                {/* 입력 폼 */}
-                <form className="space-y-6">
-                    {/* 금액 입력 */}
+                {/* 👇 3. 불필요한 중첩 div와 form을 제거하고, 하나의 form으로 전체를 감쌌습니다. */}
+                <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <label htmlFor="amount" className="block text-sm font-medium text-gray-900 dark:text-gray-900 mb-1">금액</label>
+                        <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">금액</label>
                         <div className="relative">
+                            {/* 👇 4. 입력 필드에 value와 onChange를 연결했습니다. */}
                             <input 
                                 type="number" 
-                                id="amount" 
-                                className="block w-full text-lg rounded-lg border-transparent bg-gray-200 dark:bg-gray-200 p-3 pr-10 focus:border-indigo-500 focus:ring-indigo-500"
+                                id="amount"
+                                value={amount}
+                                onChange={(e) => setAmount(e.target.value)}
+                                required
+                                className="block w-full text-lg rounded-lg border-gray-300 bg-gray-50 p-3 pr-10 focus:border-indigo-500 focus:ring-indigo-500"
                                 placeholder="0"
                             />
-                            <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-900">원</span>
+                            <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500">원</span>
                         </div>
                     </div>
         
-                    {/* 내용 입력 */}
                     <div>
-                        <label htmlFor="description" className="block text-sm font-medium text-gray-900 dark:text-gray-900 mb-1">내용</label>
+                        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">내용</label>
                         <input 
                             type="text" 
-                            id="description" 
-                            className="block w-full text-lg rounded-lg border-transparent bg-gray-200 dark:bg-gray-200 p-3 focus:border-indigo-500 focus:ring-indigo-500"
+                            id="description"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            required
+                            className="block w-full text-lg rounded-lg border-gray-300 bg-gray-50 p-3 focus:border-indigo-500 focus:ring-indigo-500"
                             placeholder="예: 스타벅스 커피"
                         />
                     </div>
         
-                    {/* 카테고리 선택 */}
                     <div>
-                        <label htmlFor="category" className="block text-sm font-medium text-gray-300 dark:text-gray-900 mb-1">카테고리</label>
+                        <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">카테고리</label>
                         <select 
-                            id="category" 
-                            className="block w-full text-lg rounded-lg border-transparent bg-gray-100 dark:bg-gray-200 p-3 focus:border-indigo-500 focus:ring-indigo-500"
+                            id="category"
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                            required
+                            className="block w-full text-lg rounded-lg border-gray-300 bg-gray-50 p-3 focus:border-indigo-500 focus:ring-indigo-500"
                         >
-                            <option>카테고리 선택</option>
+                            <option value="">카테고리 선택</option>
                             <option value="식비">식비</option>
                             <option value="교통비">교통비</option>
                             <option value="쇼핑">쇼핑</option>
@@ -92,16 +131,15 @@ function TransactionModal({ isOpen, onClose }) {
                         </select>
                     </div>
                     
-                    {/* 기록하기 버튼 */}
+                    {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+
                     <button 
                         type="submit" 
-                        className="w-full py-3 px-4 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-105"
+                        className="w-full py-3 px-4 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700"
                     >
                         기록하기
                     </button>
                 </form>
-            </div>
-                
             </div>
         </div>
     );

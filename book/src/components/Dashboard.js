@@ -4,7 +4,16 @@ import React from 'react';
 import Card from './Card';
 import ExpenseChart from './Chart'; // Mac에서는 Chart.js, Windows에서는 chart.js로 파일명이 다를 수 있으니 확인해주세요.
 
-function Dashboard({ isDarkMode }) {
+function Dashboard({ isDarkMode, transactions  }) {
+
+  const monthlyIncome = transactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+    const monthlyExpense = transactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+
+
   return (
     <main className="w-full max-w-7xl mx-auto">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">환영합니다, 사용자님!</h2>
@@ -13,15 +22,15 @@ function Dashboard({ isDarkMode }) {
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card>
           <p className="text-sm text-gray-500 mb-2">현재 잔액</p>
-          <h3 className="text-3xl font-bold text-gray-800">₩1,500,000</h3>
+          <h3 className="text-3xl font-bold text-gray-800">+{new Intl.NumberFormat('ko-KR').format(monthlyIncome)}원</h3>
         </Card>
         <Card>
             <p className="text-sm text-gray-500 mb-2">이번 달 수입</p>
-            <h3 className="text-3xl font-bold text-green-500">+₩2,000,000</h3>
+            <h3 className="text-3xl font-bold text-green-500">+{new Intl.NumberFormat('ko-KR').format(monthlyIncome)}원</h3>
         </Card>
         <Card>
             <p className="text-sm text-gray-500 mb-2">이번 달 지출</p>
-            <h3 className="text-3xl font-bold text-red-500">-₩500,000</h3>
+            <h3 className="text-3xl font-bold text-red-500">-{new Intl.NumberFormat('ko-KR').format(monthlyExpense)}원</h3>
         </Card>
       
         {/* 👇 [추가] 예산 대비 카드 */}
@@ -57,20 +66,19 @@ function Dashboard({ isDarkMode }) {
           {/* 👇 [추가] 최근 거래 내역 카드 */}
           <Card>
             <h3 className="text-xl font-bold text-gray-800 mb-4">최근 거래 내역</h3>
-            <ul className="space-y-3 text-sm">
-              <li className="flex justify-between items-center">
-                  <span className="text-gray-600">2023.10.26 / 식비</span>
-                  <span className="text-red-500 font-semibold">-₩25,000</span>
-              </li>
-              <li className="flex justify-between items-center">
-                  <span className="text-gray-600">2023.10.25 / 쇼핑</span>
-                  <span className="text-red-500 font-semibold">-₩80,000</span>
-              </li>
-              <li className="flex justify-between items-center">
-                  <span className="text-gray-600">2023.10.25 / 월급</span>
-                  <span className="text-green-500 font-semibold">+₩2,000,000</span>
-              </li>
-            </ul>
+            {/* <ul className="space-y-3 text-sm"> */}
+
+            <ul>
+                    {/* transactions 배열을 map으로 돌면서 리스트를 동적으로 생성 */}
+                    {transactions.slice(0, 3).map(t => (
+                        <li key={t.id} className="flex justify-between">
+                            <span>{new Date(t.transaction_date).toLocaleDateString()} / {t.category}</span>
+                            <span className={t.type === 'income' ? 'text-green-500' : 'text-red-500'}>
+                                {t.type === 'income' ? '+' : '-'}{new Intl.NumberFormat('ko-KR').format(t.amount)}원
+                            </span>
+                        </li>
+                    ))}
+                </ul>
           </Card>
 
         </div>
