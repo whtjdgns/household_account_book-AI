@@ -1,5 +1,4 @@
-// src/App.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
@@ -9,22 +8,35 @@ import LoginPage from './Login/LoginPage';
 import RegisterPage from './Login/RegisterPage';
 import TransactionModal from './components/TransactionModal';
 import MyPage from './components/MyPage';
+import LandingPage from './components/LandingPage';
+import ChatbotWidget from './components/ChatbotWidget';
+import MonthlyListDialog from './components/MonthlyListDialog';
+import MonthlySummaryDialog from './components/MonthlySummaryDialog';
 import axios from 'axios';
 import './App.css';
 
 function App() {
-    // --- 1. 모든 state와 함수를 맨 위에 정의합니다. ---
-    
-    // 페이지 및 상태 관리
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [showLanding, setShowLanding] = useState(true);
     const [user, setUser] = useState(null);
     const [currentPage, setCurrentPage] = useState('dashboard');
     const [authPage, setAuthPage] = useState('login');
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [transactions, setTransactions] = useState([]); 
+    const [isMonthlyListOpen, setIsMonthlyListOpen] = useState(false);
+    const [isMonthlySummaryOpen, setIsMonthlySummaryOpen] = useState(false);
+    const [selectedMonthData, setSelectedMonthData] = useState(null);
+    const [transactions, setTransactions] = useState([]);
 
-    // 서버에서 거래내역 불러오기 
+    const handleLogout = useCallback(() => {
+        if (!localStorage.getItem('authToken')) return;
+        console.log("자동 로그아웃을 실행합니다.");
+        localStorage.removeItem('authToken');
+        setUser(null);
+        setIsLoggedIn(false);
+        setShowLanding(true);
+    }, []);
+
     const fetchTransactions = async () => {
         try {
             const token = localStorage.getItem('authToken');
@@ -37,42 +49,38 @@ function App() {
         }
     };
 
-
-
-    // 로그인 했을 때 거래 내역을 한 번 불러옴
-    useEffect(() => {
-        if (isLoggedIn) {
-            fetchTransactions();
-        }
-    }, [isLoggedIn]);
-
-
-    // 헬퍼 함수
-    const openModal = () => setIsModalOpen(true);
-    const closeModal = () => setIsModalOpen(false);
-    const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
-    const showPage = (page) => setCurrentPage(page);
-
-    // 로그인 성공 시 호출될 함수
     const onLoginSuccess = () => {
         const token = localStorage.getItem('authToken');
         if (token) {
             const decodedUser = jwtDecode(token);
             setUser(decodedUser);
             setIsLoggedIn(true);
+            setShowLanding(false);
+            setCurrentPage('dashboard');
         }
     };
 
-    // 로그아웃 함수
-    const handleLogout = () => {
-        localStorage.removeItem('authToken');
-        setUser(null);
-        setIsLoggedIn(false);
-    };
+    useEffect(() => {
+        const responseInterceptor = axios.interceptors.response.use(
+            (response) => response,
+            (error) => {
+                if (error.response && error.response.status === 401) {
+                    handleLogout();
+                }
+                return Promise.reject(error);
+            }
+        );
+        return () => {
+            axios.interceptors.response.eject(responseInterceptor);
+        };
+    }, [handleLogout]);
 
-    // --- 2. 모든 useEffect를 이어서 정의합니다. ---
+    useEffect(() => {
+        if (isLoggedIn) {
+            fetchTransactions();
+        }
+    }, [isLoggedIn]);
 
-    // 다크 모드 적용 Effect
     useEffect(() => {
         if (isDarkMode) {
             document.body.classList.add('dark-mode');
@@ -81,20 +89,51 @@ function App() {
         }
     }, [isDarkMode]);
 
-    // 앱 첫 로드 시 자동 로그인 처리 Effect
     useEffect(() => {
         const token = localStorage.getItem('authToken');
         if (token) {
-            const decodedUser = jwtDecode(token);
-            setUser(decodedUser);
-            setIsLoggedIn(true);
+            try {
+                const decodedUser = jwtDecode(token);
+                if (decodedUser.exp * 1000 < Date.now()) {
+                    handleLogout();
+                } else {
+                    setUser(decodedUser);
+                    setIsLoggedIn(true);
+                    setShowLanding(false);
+                }
+            } catch (e) {
+                handleLogout();
+            }
         }
-    }, []);
+    }, [handleLogout]);
 
+    const openModal = () => setIsModalOpen(true);
+    const closeModal = () => setIsModalOpen(false);
 
-    // --- 3. 마지막에 return 로직을 한 번만 사용합니다. ---
+    const openMonthlyList = () => setIsMonthlyListOpen(true);
+    const closeMonthlyList = () => setIsMonthlyListOpen(false);
 
-    // 로그인 상태가 아니라면, 로그인 또는 회원가입 페이지를 보여줌
+    const openMonthlyDetail = (data) => {
+        setSelectedMonthData(data);
+        setIsMonthlyListOpen(false);
+        setIsMonthlySummaryOpen(true);
+    };
+
+    const closeMonthlyDetail = () => {
+        setIsMonthlySummaryOpen(false);
+        setSelectedMonthData(null);
+    };
+
+    const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
+    const showPage = (page) => setCurrentPage(page);
+    const navigateToAuth = () => setShowLanding(false);
+
+    const showChatbotPages = ['dashboard', 'report', 'settings'];
+
+    if (showLanding && !isLoggedIn) {
+        return <LandingPage onNavigateToAuth={navigateToAuth} />;
+    }
+
     if (!isLoggedIn) {
         if (authPage === 'login') {
             return <LoginPage 
@@ -107,8 +146,42 @@ function App() {
                     />;
         }
     }
+
+    const monthlyData = transactions.reduce((acc, tx) => {
+        const date = new Date(tx.transaction_date);
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        const key = `${year}-${month}`;
+
+        if (!acc[key]) {
+            acc[key] = { year, month, totalIncome: 0, totalExpense: 0 };
+        }
+
+        if (tx.type === 'income') {
+            acc[key].totalIncome += Number(tx.amount);
+        } else if (tx.type === 'expense') {
+            acc[key].totalExpense += Number(tx.amount);
+        }
+
+        return acc;
+    }, {});
+
+    const monthlyDataArray = Object.values(monthlyData).sort((a, b) => b.year - a.year || b.month - a.month);
     
-    // 로그인 상태라면, 메인 가계부 앱을 보여줌
+    const currentMonthTransactions = transactions.filter(tx => {
+        const txDate = new Date(tx.transaction_date);
+        const today = new Date();
+        return txDate.getFullYear() === today.getFullYear() && txDate.getMonth() === today.getMonth();
+    });
+
+    const monthlyIncome = currentMonthTransactions
+        .filter(tx => tx.type === 'income')
+        .reduce((acc, tx) => acc + Number(tx.amount), 0);
+
+    const monthlyExpense = currentMonthTransactions
+        .filter(tx => tx.type === 'expense')
+        .reduce((acc, tx) => acc + Number(tx.amount), 0);
+
     return (
         <div className={`min-h-screen flex flex-col p-4 md:p-8 ${isDarkMode ? 'dark-mode' : ''}`}>
             <Header
@@ -118,12 +191,16 @@ function App() {
                 toggleDarkMode={toggleDarkMode}
                 currentPage={currentPage}
                 onOpenModal={openModal}
+                darkMode={isDarkMode}
             />
 
-              {/* Dashboard에 transactions 데이터 전달 */}
             {currentPage === 'dashboard' && <Dashboard isDarkMode={isDarkMode} transactions={transactions} />}
-            
-            {currentPage === 'report' && <ReportPage />}
+            {currentPage === 'report' && <ReportPage 
+                                            transactions={currentMonthTransactions}
+                                            monthlyIncome={monthlyIncome}
+                                            monthlyExpense={monthlyExpense}
+                                            isDarkMode={isDarkMode}
+                                          />}
             {currentPage === 'settings' && <SettingsPage />}
             {currentPage === 'mypage' && <MyPage user={user} />}
 
@@ -132,8 +209,24 @@ function App() {
                 onClose={closeModal} 
                 onSaveSuccess={fetchTransactions} 
             />
-            
-            
+
+            <MonthlyListDialog
+                isOpen={isMonthlyListOpen}
+                onClose={closeMonthlyList}
+                monthlyExpenses={monthlyDataArray}
+                onMonthSelect={openMonthlyDetail}
+            />
+
+            {selectedMonthData && (
+                <MonthlySummaryDialog
+                    isOpen={isMonthlySummaryOpen}
+                    onClose={closeMonthlyDetail}
+                    monthlyIncome={selectedMonthData.totalIncome}
+                    monthlyExpense={selectedMonthData.totalExpense}
+                />
+            )}
+
+            {showChatbotPages.includes(currentPage) && <ChatbotWidget currentPage={currentPage} transactions={transactions} onOpenMonthlySummary={openMonthlyList} />}
         </div>
     );
 }

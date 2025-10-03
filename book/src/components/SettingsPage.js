@@ -58,6 +58,9 @@ function SettingsPage() {
                     </label>
                 </div>
             </Card>
+            <footer className="text-center p-4 text-gray-500 text-sm mt-8">
+                © 2025 AI 머니플래너. All Rights Reserved.
+            </footer>
         </main>
     );
 }
