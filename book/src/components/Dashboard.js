@@ -88,7 +88,7 @@ function Dashboard({ isDarkMode, transactions }) {
 
     return (
         <main className="w-full max-w-7xl mx-auto">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">환영합니다, 사용자님!</h2>
+            
             
             <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <Card>
