@@ -10,6 +10,12 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const db = require('./db'); // 데이터베이스 연결 모듈
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+
+//네이버 로그인 함수 
+const NaverStrategy = require('passport-naver').Strategy;
+
 
 // 2. Express 앱 생성 및 기본 설정
 const app = express();
@@ -275,7 +281,112 @@ app.get('/api/gemini/test', (req, res) => {
     }
 });
 
-// 5. 서버 실행
+
+
+// 구글 통합 로그인 
+app.use(passport.initialize());
+
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "/api/auth/google/callback" // 1단계에서 등록한 주소
+  },
+  async (accessToken, refreshToken, profile, done) => {
+    // 구글로부터 사용자 정보를 받아온 후 실행되는 함수
+    try {
+        const email = profile.emails[0].value;
+        const name = profile.displayName;
+
+        // 1. DB에서 이메일로 사용자 조회
+        let [users] = await db.query('SELECT * FROM users WHERE username = ?', [email]);
+        let user = users[0];
+
+        // 2. 사용자가 없으면, 새로 생성 (자동 회원가입)
+        if (!user) {
+            const [newUser] = await db.query(
+                'INSERT INTO users (username, name) VALUES (?, ?)',
+                [email, name]
+            );
+            [users] = await db.query('SELECT * FROM users WHERE id = ?', [newUser.insertId]);
+            user = users[0];
+        }
+        
+        // 3. 사용자 정보를 다음 단계로 전달
+        done(null, user);
+
+    } catch (error) {
+        done(error);
+    }
+  }
+));
+
+//구글 API 소셜 로그인 본격 구현 
+// 1. 프론트에서 구글 로그인 시작을 위해 접속할 주소
+app.get('/api/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+// 2. 구글 로그인 성공 후, 리디렉션될 주소
+app.get('/api/auth/google/callback', 
+  passport.authenticate('google', { session: false }), // session: false 중요
+  (req, res) => {
+    // 3. Passport가 사용자 인증/생성을 완료하면, 우리 앱의 JWT 토큰을 발급
+    const payload = { id: req.user.id, username: req.user.username, name: req.user.name };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    // 4. 프론트엔드로 리디렉션하면서 토큰 전달 (예: 쿼리 파라미터)
+    res.redirect(`http://localhost:3000/auth/callback?token=${token}`);
+  }
+);
+
+
+
+// 네이버 서버 설정 
+passport.use(new NaverStrategy({
+    clientID: process.env.NAVER_CLIENT_ID,
+    clientSecret: process.env.NAVER_CLIENT_SECRET,
+    callbackURL: "/api/auth/naver/callback"
+  },
+  async (accessToken, refreshToken, profile, done) => {
+    try {
+        // 네이버는 프로필 정보가 _json 객체 안에 있습니다.
+        const email = profile._json.email;
+        const name = profile._json.name;
+
+        let [users] = await db.query('SELECT * FROM users WHERE username = ?', [email]);
+        let user = users[0];
+
+        if (!user) {
+            const [newUser] = await db.query('INSERT INTO users (username, name) VALUES (?, ?)', [email, name]);
+            [users] = await db.query('SELECT * FROM users WHERE id = ?', [newUser.insertId]);
+            user = users[0];
+        }
+        
+        done(null, user);
+    } catch (error) {
+        done(error);
+    }
+  }
+));
+
+
+// ## 네이버 소셜 로그인 API ##
+app.get('/api/auth/naver',
+  passport.authenticate('naver', { authType: 'reprompt' })
+);
+
+app.get('/api/auth/naver/callback', 
+  passport.authenticate('naver', { session: false }),
+  (req, res) => {
+    const payload = { id: req.user.id, username: req.user.username, name: req.user.name };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    res.redirect(`http://localhost:3000/auth/callback?token=${token}`);
+  }
+);
+
+
+
+// 5. 서버 실행 이코드 무조건 맨 아래로
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`백엔드 서버가 ${PORT}번 포트에서 실행 중입니다.`);
