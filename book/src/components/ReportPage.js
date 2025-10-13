@@ -2,12 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import Chart from 'chart.js/auto';
 
 // 다이얼로그를 위한 별도의 컴포넌트
-const ComparisonDialog = ({ isOpen, onClose, category, userAmount, isDarkMode }) => {
+const ComparisonDialog = ({ isOpen, onClose, category, userAmount, averageAmount, isLoading, isDarkMode }) => {
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
 
     useEffect(() => {
-        if (isOpen && chartRef.current) {
+        if (isOpen && chartRef.current && !isLoading) {
             if (chartInstance.current) {
                 chartInstance.current.destroy();
             }
@@ -23,7 +23,16 @@ const ComparisonDialog = ({ isOpen, onClose, category, userAmount, isDarkMode })
                             data: [userAmount],
                             backgroundColor: 'rgba(79, 70, 229, 0.8)',
                             borderColor: 'rgba(79, 70, 229, 1)',
-                            borderWidth: 1
+                            borderWidth: 1,
+                            barPercentage: 0.5
+                        },
+                        {
+                            label: '다른 사용자 평균',
+                            data: [Math.round(averageAmount)],
+                            backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                            borderColor: 'rgba(239, 68, 68, 1)',
+                            borderWidth: 1,
+                            barPercentage: 0.5
                         }
                     ]
                 },
@@ -40,15 +49,19 @@ const ComparisonDialog = ({ isOpen, onClose, category, userAmount, isDarkMode })
                         }
                     },
                     plugins: {
-                        legend: { display: false }, // Hide legend as there's only one dataset
+                        legend: { position: 'top', labels: { color: isDarkMode ? '#e5e7eb' : '#4b5563' } },
                         tooltip: { callbacks: { label: (item) => `${item.dataset.label}: ${item.raw.toLocaleString()}원` } }
                     }
                 }
             });
         }
-    }, [isOpen, category, userAmount, isDarkMode]);
+    }, [isOpen, isLoading, category, userAmount, averageAmount, isDarkMode]);
     
     if (!isOpen) return null;
+
+    const roundedAverage = Math.round(averageAmount);
+    const difference = userAmount - roundedAverage;
+    const absDifference = Math.abs(difference);
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -58,14 +71,44 @@ const ComparisonDialog = ({ isOpen, onClose, category, userAmount, isDarkMode })
                     <button onClick={onClose} className="text-gray-500 hover:text-gray-800 text-3xl leading-none">&times;</button>
                 </div>
                 <div className="p-6 space-y-4">
-                    <div className="h-64">
-                        <canvas ref={chartRef}></canvas>
-                    </div>
-                    <div className="p-4 rounded-lg text-center bg-gray-50 text-gray-700">
-                        <p className="font-medium">
-                            이 카테고리에서 총 <span className="font-bold">${userAmount.toLocaleString()}원</span>을 사용했습니다.
-                        </p>
-                    </div>
+                    {isLoading ? (
+                        <div className="flex justify-center items-center h-64">
+                            <p>평균 데이터 불러오는 중...</p>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="h-64">
+                                <canvas ref={chartRef}></canvas>
+                            </div>
+                            <div className="p-4 rounded-lg text-center bg-gray-50 text-gray-700">
+                                <p className="font-medium">
+                                    이 카테고리에서 총 <span className="font-bold">{userAmount.toLocaleString()}원</span>을 사용했습니다.
+                                </p>
+                                <p className="font-medium mt-2">
+                                    다른 사용자들은 평균적으로 <span className="font-bold">{roundedAverage.toLocaleString()}원</span>을 사용했습니다.
+                                </p>
+                                <div className="mt-4 pt-4 border-t">
+                                    {difference !== 0 ? (
+                                        <p className="font-medium text-lg">
+                                            {difference > 0 ? (
+                                                <>
+                                                    다른 사용자보다 <span className="font-bold text-red-500">{absDifference.toLocaleString()}원</span> 더 사용했습니다.
+                                                </>
+                                            ) : (
+                                                <>
+                                                    다른 사용자보다 <span className="font-bold text-green-500">{absDifference.toLocaleString()}원</span> 덜 사용했습니다.
+                                                </>
+                                            )}
+                                        </p>
+                                    ) : (
+                                        <p className="font-medium text-lg">
+                                            다른 사용자와 평균적으로 같은 금액을 사용했습니다.
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         </div>
@@ -77,6 +120,8 @@ function ReportPage({ transactions = [], monthlyIncome = 0, monthlyExpense = 0, 
     const barChartRef = useRef(null);
     const barChartInstance = useRef(null);
     const [comparisonData, setComparisonData] = useState(null);
+    const [averageAmount, setAverageAmount] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (barChartInstance.current) {
@@ -93,14 +138,16 @@ function ReportPage({ transactions = [], monthlyIncome = 0, monthlyExpense = 0, 
                         data: [monthlyIncome],
                         backgroundColor: 'rgba(16, 185, 129, 0.8)',
                         borderColor: 'rgba(16, 185, 129, 1)',
-                        borderWidth: 1
+                        borderWidth: 1,
+                        barPercentage: 0.5
                     },
                     {
                         label: '총 지출',
                         data: [monthlyExpense],
                         backgroundColor: 'rgba(239, 68, 68, 0.8)',
                         borderColor: 'rgba(239, 68, 68, 1)',
-                        borderWidth: 1
+                        borderWidth: 1,
+                        barPercentage: 0.5
                     }
                 ]
             },
@@ -129,6 +176,38 @@ function ReportPage({ transactions = [], monthlyIncome = 0, monthlyExpense = 0, 
             }
         };
     }, [monthlyIncome, monthlyExpense, isDarkMode]);
+
+    const handleCategoryClick = async (category, amount) => {
+        setComparisonData({ category, amount });
+        setIsLoading(true);
+        try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                alert('로그인이 필요합니다. 다시 로그인해주세요.');
+                throw new Error('인증 토큰이 없습니다.');
+            }
+            const response = await fetch(`http://localhost:5000/api/transactions/average/${encodeURIComponent(category)}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ message: '서버 응답이 올바르지 않습니다.' }));
+                throw new Error(errorData.message || '데이터를 불러오는데 실패했습니다.');
+            }
+            const data = await response.json();
+            setAverageAmount(data.average);
+        } catch (error) {
+            console.error('Error fetching average spending:', error.message);
+            if (!error.message.includes('인증 토큰')) {
+                 alert(`오류가 발생했습니다: ${error.message}`);
+            }
+            setAverageAmount(0); // 에러 발생 시 0으로 설정
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const expenseCategories = transactions
         .filter(tx => tx.type === 'expense')
@@ -163,7 +242,7 @@ function ReportPage({ transactions = [], monthlyIncome = 0, monthlyExpense = 0, 
                                     <div 
                                         key={category} 
                                         className="flex justify-between items-center p-2 rounded-lg cursor-pointer hover:bg-gray-100"
-                                        onClick={() => setComparisonData({ category, amount })}
+                                        onClick={() => handleCategoryClick(category, amount)}
                                     >
                                         <span className="font-semibold">{category}</span>
                                         <div>
@@ -185,15 +264,16 @@ function ReportPage({ transactions = [], monthlyIncome = 0, monthlyExpense = 0, 
                 onClose={() => setComparisonData(null)}
                 category={comparisonData?.category}
                 userAmount={comparisonData?.amount}
+                averageAmount={averageAmount}
+                isLoading={isLoading}
                 isDarkMode={isDarkMode}
             />
 
             <footer className="text-center p-4 text-gray-500 text-sm mt-8">
-                <p>© 2025 AI 머니플래너. All Rights Reserved.</p>
+                <p>© 2025 Fin Log. All Rights Reserved.</p>
             </footer>
         </>
     );
 }
 
 export default ReportPage;
-

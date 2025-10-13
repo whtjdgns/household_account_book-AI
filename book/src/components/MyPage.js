@@ -8,6 +8,7 @@ function MyPage({ user }) {
     }
 
     return (
+    <>
         <main className="w-full max-w-4xl mx-auto space-y-8">
             <div>
                 <h2 className="text-3xl font-bold text-gray-800">마이페이지</h2>
@@ -51,7 +52,13 @@ function MyPage({ user }) {
                 </form>
             </Card>
         </main>
+       <footer className="text-center p-4 text-gray-500 text-sm mt-8">
+                <p>© 2025 Fin Log. All Rights Reserved.</p>
+            </footer>
+        </>
+        
     );
+    
 }
 
 export default MyPage;

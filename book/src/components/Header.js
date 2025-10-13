@@ -8,7 +8,7 @@ function Header({ user, handleLogout, showPage, currentPage, toggleDarkMode, onO
 
     return (
         <header className="flex flex-col md:flex-row justify-between items-center py-4 px-6 mb-6 card">
-            <h1 className="text-2xl font-bold text-indigo-600 mb-4 md:mb-0">AI머니플래너</h1>
+            <h1 className="text-2xl font-bold text-indigo-600 mb-4 md:mb-0">핀로그</h1>
             <nav className="flex-grow flex justify-center space-x-4 md:space-x-8">
                 <button type="button" onClick={() => showPage('dashboard')} className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`}>
                     <FaChartLine className="mr-2" />대시보드

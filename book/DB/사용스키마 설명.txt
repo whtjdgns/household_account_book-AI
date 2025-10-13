@@ -1,0 +1,80 @@
+-- ====================================================================
+-- 가계부 애플리케이션을 위한 데이터베이스 및 테이블 생성 스크립트
+--
+-- [주요 기능]
+-- 1. `account_book` 데이터베이스 생성 (한글 지원 설정 포함)
+-- 2. 사용자 정보를 저장하는 `users` 테이블 생성
+-- 3. 거래 내역을 저장하는 `transactions` 테이블 생성
+-- 4. 샘플 데이터 조작 (삭제, 추가, 수정) 명령어 포함
+--
+-- [참고]
+-- 후반부 INSERT, UPDATE 구문에서 `role` 컬럼을 사용하고 있습니다.
+-- 이 스크립트를 오류 없이 실행하려면 `users` 테이블에 `role` 컬럼이
+-- 먼저 추가되어야 합니다. (예: ALTER TABLE users ADD COLUMN role VARCHAR(50);)
+-- ====================================================================
+
+-- 1. 'account_book' 데이터베이스가 없다면 새로 생성합니다.
+--    CHARACTER SET과 COLLATE 설정은 한글이 깨지지 않게 하기 위함입니다.
+CREATE DATABASE IF NOT EXISTS account_book
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
+
+-- 2. 앞으로 이 데이터베이스를 사용하겠다고 지정합니다.
+USE account_book;
+
+-- 3. 'users' 테이블을 생성합니다.
+CREATE TABLE IF NOT EXISTS users (
+    -- id: 고유 번호, 기본 키(PRIMARY KEY), 자동으로 1씩 증가(AUTO_INCREMENT)
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    
+    -- username: 아이디(이메일), 비어있을 수 없고(NOT NULL), 중복될 수 없음(UNIQUE)
+    username      VARCHAR(255) NOT NULL UNIQUE,
+    
+    -- name: 사용자 이름, 비어있어도 됨(NULL)
+    name          VARCHAR(100) NULL,
+    
+    -- password_hash: 암호화된 비밀번호, 비어있을 수 없음
+    password_hash VARCHAR(255) NOT NULL,
+    
+    -- created_at: 계정 생성일, 데이터 생성 시 자동으로 현재 시간이 기록됨
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- password_hash 컬럼이 NULL 값을 가질 수 있도록 추후에 수정
+ALTER TABLE users MODIFY COLUMN password_hash VARCHAR(255) NULL;
+
+
+-- 'transactions' 테이블을 생성합니다.
+CREATE TABLE transactions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    type ENUM('expense', 'income') NOT NULL,
+    amount DECIMAL(15, 2) NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- 4. 테이블이 잘 만들어졌는지 확인하는 명령어 (선택 사항)
+SELECT * FROM users;
+SELECT * FROM transactions;
+
+-- id가 '9'인 사용자 삭제
+DELETE FROM account_book.users
+WHERE id = '9';
+
+-- 'admin' 권한을 가진 사용자 추가
+INSERT INTO users (username, name, password_hash, role)
+VALUES (
+    'admin@gmail.com',
+    'admin',
+    '$2b$10$s8GWVNJWmhpddNuZmt7EEun1LdlUQPlSb7Wtl2sYcP3A9FtbwUpH6',
+    'admin'
+);
+
+-- 특정 사용자의 정보 확인
+SELECT username, role FROM users WHERE username = 'admin@gmail.com';
+
+-- 특정 사용자의 권한 수정
+UPDATE users SET role = 'admin' WHERE username = 'admin@gmail.com';

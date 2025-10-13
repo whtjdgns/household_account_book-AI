@@ -187,7 +187,7 @@ function App() {
             <TransactionModal isOpen={isModalOpen} onClose={closeModal} onSaveSuccess={fetchTransactions} />
             <MonthlyListDialog isOpen={isMonthlyListOpen} onClose={closeMonthlyList} monthlyExpenses={monthlyDataArray} onMonthSelect={openMonthlyDetail} />
             {selectedMonthData && <MonthlySummaryDialog isOpen={isMonthlySummaryOpen} onClose={closeMonthlyDetail} monthlyIncome={selectedMonthData.totalIncome} monthlyExpense={selectedMonthData.totalExpense} />}
-            {showChatbotPages.includes(currentPage) && <ChatbotWidget currentPage={currentPage} transactions={transactions} onOpenMonthlySummary={openMonthlyList} />}
+            {showChatbotPages.includes(currentPage) && <ChatbotWidget currentPage={currentPage} transactions={transactions} onOpenMonthlySummary={openMonthlyList} userRole={user?.role} />}
         </div>
     );
 }

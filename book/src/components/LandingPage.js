@@ -66,7 +66,7 @@ function LandingPage({ onNavigateToAuth }) {
             `}</style>
             <header id="main-header" className="sticky top-0 z-50 transition-all duration-300">
                 <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
-                    <div className="text-2xl font-bold text-violet-600">AI 머니플래너</div>
+                    <div className="text-2xl font-bold text-violet-600">핀로그</div>
                     <div className="hidden md:flex items-center space-x-8">
                         <a href="#features" className="text-gray-600 hover:text-violet-600 font-medium">핵심 기능</a>
                         <a href="#how-it-works" className="text-gray-600 hover:text-violet-600 font-medium">작동 방식</a>
@@ -86,7 +86,7 @@ function LandingPage({ onNavigateToAuth }) {
                                     스마트한 자산 관리,<br/>AI와 함께 쉽고 간편하게
                                 </h1>
                                 <p className="text-lg md:text-xl text-gray-600 max-w-lg mb-10">
-                                    AI가 당신의 소비 패턴을 분석하고, 현명한 금융 결정을 내릴 수 있도록 돕습니다. 복잡한 가계부 앱은 이제 그만, AI 머니플래너로 시작하세요.
+                                    AI가 당신의 소비 패턴을 분석하고, 현명한 금융 결정을 내릴 수 있도록 돕습니다. 복잡한 가계부 앱은 이제 그만, 핀로그로 시작하세요.
                                 </p>
                                 <button onClick={onNavigateToAuth} className="cta-btn bg-violet-600 text-white font-bold py-4 px-10 rounded-full text-lg hover:bg-violet-700 transition-transform duration-300 transform hover:scale-105 inline-block shadow-lg shadow-violet-500/30">
                                     지금 바로 경험하기
@@ -133,7 +133,7 @@ function LandingPage({ onNavigateToAuth }) {
                      <div className="container mx-auto px-6">
                         <div className="text-center mb-16">
                             <h2 className="text-3xl md:text-4xl font-bold">단 3단계면 충분합니다</h2>
-                            <p className="text-lg text-gray-500 mt-2">AI 머니플래너는 이렇게 작동해요.</p>
+                            <p className="text-lg text-gray-500 mt-2">핀로그는 이렇게 작동해요.</p>
                         </div>
                         <div className="relative">
                             <div className="hidden md:block absolute top-1/2 left-0 w-full h-px bg-gray-300 border-t-2 border-dashed -translate-y-1/2"></div>
@@ -192,7 +192,7 @@ function LandingPage({ onNavigateToAuth }) {
             </main>
             <footer className="bg-gray-800 text-gray-400 text-center py-6 mt-auto">
                 <div className="container mx-auto">
-                    <p>© 2025 AI 머니플래너. All Rights Reserved.</p>
+                    <p>© 2025 Fin Log. All Rights Reserved.</p>
                 </div>
             </footer>
         </div>

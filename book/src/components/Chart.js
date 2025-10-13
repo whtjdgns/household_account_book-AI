@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
 
-function ExpenseChart({ isDarkMode, data }) { // 'data' prop 추가
+function ExpenseChart({ isDarkMode, data, type = 'pie' }) { // 'data', 'type' prop 추가
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
 
@@ -18,7 +18,7 @@ function ExpenseChart({ isDarkMode, data }) { // 'data' prop 추가
     const ctx = chartRef.current.getContext('2d');
     
     chartInstance.current = new Chart(ctx, {
-      type: 'pie',
+      type: type, // props로 받은 차트 타입 사용
       data: data, // props로 받은 데이터 사용
       options: {
         responsive: true,
@@ -41,7 +41,7 @@ function ExpenseChart({ isDarkMode, data }) { // 'data' prop 추가
       }
     };
     
-  }, [isDarkMode, data]); // data가 바뀔 때마다 차트를 다시 그리도록 설정
+  }, [isDarkMode, data, type]); // data 또는 type이 바뀔 때마다 차트를 다시 그리도록 설정
 
   return (
     <div className="chart-container" style={{ height: '350px' }}>
