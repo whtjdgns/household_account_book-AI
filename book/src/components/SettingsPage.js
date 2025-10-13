@@ -12,7 +12,7 @@ function SettingsPage() {
             </div>
 
             {/* 예산 관리 카드 */}
-            <Card>
+            {/* <Card>
                 <h3 className="text-xl font-bold text-gray-800 mb-4">예산 관리</h3>
                 <div>
                     <label htmlFor="budget" className="block text-sm font-medium text-gray-700">한 달 예산 설정</label>
@@ -26,7 +26,7 @@ function SettingsPage() {
                         예산 저장
                     </button>
                 </div>
-            </Card>
+            </Card> */}
 
             {/* 카테고리 관리 카드 */}
             <Card>
@@ -48,7 +48,7 @@ function SettingsPage() {
             </Card>
 
              {/* 알림 설정 카드 */}
-            <Card>
+            {/* <Card>
                 <h3 className="text-xl font-bold text-gray-800 mb-4">알림 설정</h3>
                 <div className="flex items-center justify-between">
                     <span className="text-gray-800">예산 초과 임박 시 알림 받기</span>
@@ -57,7 +57,7 @@ function SettingsPage() {
                         <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-indigo-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                     </label>
                 </div>
-            </Card>
+            </Card> */}
             <footer className="text-center p-4 text-gray-500 text-sm mt-8">
                 © 2025 Fin Log. All Rights Reserved.
             </footer>

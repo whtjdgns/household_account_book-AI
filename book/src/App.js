@@ -182,7 +182,7 @@ function App() {
             {currentPage === 'dashboard' && <Dashboard isDarkMode={isDarkMode} transactions={transactions} />}
             {currentPage === 'report' && <ReportPage transactions={currentMonthTransactions} monthlyIncome={monthlyIncome} monthlyExpense={monthlyExpense} isDarkMode={isDarkMode} />}
             {currentPage === 'settings' && <SettingsPage />}
-            {currentPage === 'mypage' && <MyPage user={user} />}
+            {currentPage === 'mypage' && <MyPage user={user} handleLogout={handleLogout} />}
 
             <TransactionModal isOpen={isModalOpen} onClose={closeModal} onSaveSuccess={fetchTransactions} />
             <MonthlyListDialog isOpen={isMonthlyListOpen} onClose={closeMonthlyList} monthlyExpenses={monthlyDataArray} onMonthSelect={openMonthlyDetail} />

@@ -1,0 +1,54 @@
+-- 사용할 데이터베이스를 선택합니다.
+USE account_book;
+
+-- --------------------------------------------------------
+-- 1. `users` 테이블 수정: 소셜 로그인을 위한 `provider` 컬럼 추가
+-- --------------------------------------------------------
+-- 이 컬럼은 사용자가 'local'(일반), 'google', 'naver' 중 어떤 방식으로 가입했는지 저장합니다.
+ALTER TABLE users
+ADD COLUMN provider VARCHAR(50) NOT NULL DEFAULT 'local' AFTER name;
+
+
+-- --------------------------------------------------------
+-- 2. `categories` 테이블 생성 및 기본 데이터 추가
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL, -- 사용자가 추가한 카테고리의 경우에만 user_id가 기록됩니다.
+    name VARCHAR(50) NOT NULL,
+    is_default BOOLEAN DEFAULT FALSE, -- TRUE이면 모든 사용자가 보는 기본 카테고리입니다.
+    -- 사용자가 삭제(탈퇴)되면, 해당 사용자가 만든 카테고리도 함께 삭제됩니다.
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 모든 사용자가 공통으로 사용할 기본 카테고리를 추가합니다.
+-- IGNORE는 이미 데이터가 있을 경우 오류 없이 넘어가도록 합니다.
+INSERT IGNORE INTO categories (name, is_default) VALUES
+('식비', TRUE),
+('교통비', TRUE),
+('쇼핑', TRUE),
+('문화생활', TRUE),
+('월급', TRUE);
+
+
+-- --------------------------------------------------------
+-- 3. 회원 탈퇴 시 거래 내역 자동 삭제 설정 (ON DELETE CASCADE)
+-- --------------------------------------------------------
+-- 이 설정은 사용자를 삭제할 때, 해당 사용자의 거래 내역도 자동으로 함께 삭제되도록 합니다.
+
+-- 3-1. `transactions` 테이블의 기존 외래 키(Foreign Key) 제약 조건을 먼저 삭제합니다.
+--      (만약 제약 조건 이름이 다르다면, 이전 오류 메시지에 나왔던 이름으로 바꿔주세요.)
+ALTER TABLE transactions DROP FOREIGN KEY transactions_ibfk_1;
+
+-- 3-2. `ON DELETE CASCADE` 옵션이 포함된 새로운 외래 키 제약 조건을 추가합니다.
+ALTER TABLE transactions 
+ADD CONSTRAINT fk_user_transactions 
+FOREIGN KEY (user_id) 
+REFERENCES users(id) 
+ON DELETE CASCADE;
+
+
+-- --------------------------------------------------------
+-- 모든 설정이 완료되었습니다.
+-- --------------------------------------------------------
+SELECT '모든 스키마 변경 및 설정이 성공적으로 완료되었습니다.' AS Status;

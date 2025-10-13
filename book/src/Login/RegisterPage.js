@@ -132,6 +132,14 @@ function RegisterPage({ onSwitchToLogin }) {
                                 <button type="button" onClick={handleVerifyCode} disabled={isLoading || timer === 0} className="px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-md hover:bg-indigo-700 whitespace-nowrap disabled:bg-indigo-300 disabled:cursor-not-allowed">
                                     {isLoading && isCodeSent ? '확인중...' : '인증 확인'}
                                 </button>
+                                 <button // 재전송 버튼 
+                                    type="button" 
+                                    onClick={handleSendCode} 
+                                    disabled={isLoading} // 타이머와 상관없이 로딩 중일 때만 비활성화
+                                    className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-semibold rounded-md hover:bg-gray-300 whitespace-nowrap disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                >
+                                    재전송
+                                </button>
                             </div>
                         )}
                          {isVerified && <p className="text-green-600 text-sm text-center">✅ 이메일 인증이 완료되었습니다.</p>}
@@ -168,7 +176,7 @@ function RegisterPage({ onSwitchToLogin }) {
                 </div>
 
                 
-                <div className="space-y-4">
+                {/* <div className="space-y-4">
                     <a href="http://localhost:5000/api/auth/google" 
                 className="w-full py-3 px-4 flex justify-center items-center bg-[#EA4335] ...">
     
@@ -186,7 +194,7 @@ function RegisterPage({ onSwitchToLogin }) {
                         네이버로 회원가입
                     </button>
                         </a>
-                </div>
+                </div> */}
                 
                  <p className="mt-8 text-center text-sm text-gray-600">
                     이미 계정이 있으신가요? <button onClick={onSwitchToLogin} className="font-medium text-indigo-600 hover:text-indigo-500">로그인</button>
