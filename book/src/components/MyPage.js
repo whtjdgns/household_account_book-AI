@@ -4,7 +4,7 @@ import axios from 'axios';
 import Card from './Card';
 
 // App.js로부터 handleLogout 함수를 props로 받아옵니다.
-function MyPage({ user, handleLogout }) {
+function MyPage({ user, handleLogout, categories = [], onCategoryUpdate }) {
     // --- State 변수 선언 ---
     // 비밀번호 변경
     const [currentPassword, setCurrentPassword] = useState('');
@@ -12,7 +12,7 @@ function MyPage({ user, handleLogout }) {
     const [confirmNewPassword, setConfirmNewPassword] = useState('');
     
     // 카테고리 관리
-    const [categories, setCategories] = useState([]);
+    //const [categories, setCategories] = useState([]);
     const [newCategory, setNewCategory] = useState('');
 
     // 회원 탈퇴
@@ -26,20 +26,20 @@ function MyPage({ user, handleLogout }) {
 
     // --- 데이터 로딩 ---
     // 컴포넌트가 처음 렌더링될 때 카테고리 목록을 불러옵니다.
-    useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const token = localStorage.getItem('authToken');
-                const response = await axios.get('http://localhost:5000/api/categories', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                setCategories(response.data);
-            } catch (err) {
-                setError('카테고리를 불러오는 데 실패했습니다.');
-            }
-        };
-        fetchCategories();
-    }, []);
+    // useEffect(() => {
+    //     const fetchCategories = async () => {
+    //         try {
+    //             const token = localStorage.getItem('authToken');
+    //             const response = await axios.get('http://localhost:5000/api/categories', {
+    //                 headers: { 'Authorization': `Bearer ${token}` }
+    //             });
+    //             setCategories(response.data);
+    //         } catch (err) {
+    //             setError('카테고리를 불러오는 데 실패했습니다.');
+    //         }
+    //     };
+    //     fetchCategories();
+    // }, []);
 
     // --- 이벤트 핸들러 함수 ---
    const handleChangePassword = async (e) => {
@@ -56,6 +56,7 @@ function MyPage({ user, handleLogout }) {
                 { currentPassword, newPassword },
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );
+            
             // 👇 성공 메시지를 state에 저장
             setMessage(response.data.message);
             setCurrentPassword('');
@@ -80,8 +81,9 @@ function MyPage({ user, handleLogout }) {
             const response = await axios.get('http://localhost:5000/api/categories', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            setCategories(response.data);
+            //setCategories(response.data);
             setNewCategory(''); // 입력 필드 초기화
+            onCategoryUpdate();
         } catch (err) {
             setError('카테고리 추가에 실패했습니다.');
         }
@@ -97,7 +99,8 @@ function MyPage({ user, handleLogout }) {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 // 화면에서 삭제된 카테고리 제거
-                setCategories(categories.filter(cat => cat.id !== categoryId));
+                //setCategories(categories.filter(cat => cat.id !== categoryId));
+                onCategoryUpdate();
             } catch (err) {
                 setError('카테고리 삭제에 실패했습니다.');
             }
@@ -175,7 +178,7 @@ function MyPage({ user, handleLogout }) {
                     {categories.map(category => (
                         <div key={category.id} className="flex justify-between items-center p-2 bg-gray-50 rounded-md">
                             <span className={category.is_default ? "text-gray-500" : "text-gray-800"}>
-                                {category.name} {category.is_default && '(기본)'}
+                                 {category.name} {category.is_default ? '(기본)' : ''}
                             </span>
                             {!category.is_default && (
                                 <button onClick={() => handleDeleteCategory(category.id)} className="text-red-500 hover:text-red-700 text-sm font-semibold">삭제</button>

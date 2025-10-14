@@ -390,36 +390,78 @@ app.post('/api/email/verify-code', (req, res) => {
     }
 });
 
-// ## Gemini API 카테고리 추천 라우트 ##
-app.post('/api/gemini/suggest-category', async (req, res) => {
-    const { description } = req.body;
+// // ## Gemini API 카테고리 추천 라우트 ## 기존거 
+// app.post('/api/gemini/suggest-category', async (req, res) => {
+//     const { description } = req.body;
 
    
 
-    if (!description) {
-        return res.status(400).json({ message: '거래 내역을 입력해주세요.' });
-    }
+//     if (!description) {
+//         return res.status(400).json({ message: '거래 내역을 입력해주세요.' });
+//     }
 
+//     try {
+//        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+//         const categories = ['식비', '교통', '공과금', '쇼핑', '여가', '의료/건강', '기타'];
+//         const prompt = `다음 지출 내역에 가장 적합한 카테고리를 아래 목록에서 하나만 골라주세요. 다른 설명 없이 카테고리 이름만 정확히 반환해야 합니다. 만약 목록에 적합한 카테고리가 없다면 '기타'로 지정해주세요.\n\n목록: [${categories.join(', ')}]
+// 지출 내역: "${description}"`;
+//         console.log('Prompt:', prompt);
+
+//         const result = await model.generateContent(prompt);
+//         const response = await result.response;
+//         let suggestedCategory = await response.text();
+
+//         if (!categories.includes(suggestedCategory.trim())) {
+//             suggestedCategory = '기타';
+//         }
+
+//         res.status(200).json({ suggestedCategory: suggestedCategory.trim() });
+
+//     } catch (error) {
+//         console.error('Gemini API 호출 오류:', error);
+//         res.status(500).json({ message: 'AI 카테고리 추천 중 오류가 발생했습니다.' });
+//     }
+// });
+
+// ## Gemini API 카테고리 추천 라우트 (수정됨) ##
+app.post('/api/gemini/suggest-category', async (req, res) => {
     try {
-       const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        // 1. 요청 헤더에서 토큰을 가져와 사용자 인증
+        const token = req.headers.authorization.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: '인증 토큰이 없습니다.' });
+        }
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.id;
+        
+        const { description } = req.body;
+        if (!description) {
+            return res.status(400).json({ message: '거래 내역을 입력해주세요.' });
+        }
 
-        const categories = ['식비', '교통', '공과금', '쇼핑', '여가', '의료/건강', '기타'];
-        const prompt = `다음 지출 내역에 가장 적합한 카테고리를 아래 목록에서 하나만 골라주세요. 다른 설명 없이 카테고리 이름만 정확히 반환해야 합니다. 만약 목록에 적합한 카테고리가 없다면 '기타'로 지정해주세요.\n\n목록: [${categories.join(', ')}]
-지출 내역: "${description}"`;
-        console.log('Prompt:', prompt);
+        // 2. DB에서 사용자의 전체 카테고리 목록(기본+커스텀)을 조회
+        const categorySql = 'SELECT name FROM categories WHERE is_default = TRUE OR user_id = ?';
+        const [categoryRows] = await db.query(categorySql, [userId]);
+        const userCategories = categoryRows.map(row => row.name);
+
+        // 3. 조회된 카테고리 목록을 AI 프롬프트에 동적으로 삽입
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        const prompt = `다음 지출 내역에 가장 적합한 카테고리를 아래 목록에서 하나만 골라줘. 다른 설명 없이 카테고리 이름만 정확히 반환해야 해. 만약 목록에 적합한 카테고리가 없다면 '기타'로 지정해줘.\n\n사용자 카테고리 목록: [${userCategories.join(', ')}]\n지출 내역: "${description}"`;
 
         const result = await model.generateContent(prompt);
         const response = await result.response;
-        let suggestedCategory = await response.text();
+        let suggestedCategory = response.text().trim();
 
-        if (!categories.includes(suggestedCategory.trim())) {
+        // AI가 목록에 없는 값을 반환할 경우를 대비한 안전장치
+        if (!userCategories.includes(suggestedCategory)) {
             suggestedCategory = '기타';
         }
 
-        res.status(200).json({ suggestedCategory: suggestedCategory.trim() });
+        res.status(200).json({ suggestedCategory });
 
     } catch (error) {
-        console.error('Gemini API 호출 오류:', error);
+        console.error('AI 카테고리 추천 오류:', error);
         res.status(500).json({ message: 'AI 카테고리 추천 중 오류가 발생했습니다.' });
     }
 });

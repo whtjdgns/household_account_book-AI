@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-function TransactionModal({ isOpen, onClose, onSaveSuccess }) {
+function TransactionModal({ isOpen, onClose, onSaveSuccess, categories = []  }) {
     const [transactionType, setTransactionType] = useState('expense');
     const [amount, setAmount] = useState('');
     const [description, setDescription] = useState('');
@@ -22,12 +22,24 @@ function TransactionModal({ isOpen, onClose, onSaveSuccess }) {
             const fetchSuggestion = async () => {
                 setIsSuggesting(true);
                 try {
+                    const token = localStorage.getItem('authToken'); // 👈 토큰 가져오기
                     const response = await axios.post('http://localhost:5000/api/gemini/suggest-category', {
-                        description: description
-                    });
-                    if (response.data.suggestedCategory) {
-                        setCategory(response.data.suggestedCategory);
-                    }
+                    description: description
+                }, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.data.suggestedCategory) {
+                    setCategory(response.data.suggestedCategory);
+                }
+
+                    // const response = await axios.post('http://localhost:5000/api/gemini/suggest-category', {
+                    //     description: description
+                    // });
+                    // if (response.data.suggestedCategory) {
+                    //     setCategory(response.data.suggestedCategory);
+                    // }
+                    
                 } catch (err) {
                     console.error("AI 추천 실패:", err);
                     if (err.response) {
@@ -128,13 +140,10 @@ function TransactionModal({ isOpen, onClose, onSaveSuccess }) {
                         </label>
                         <select id="category" value={category} onChange={(e) => setCategory(e.target.value)} required className="block w-full text-lg rounded-lg border-gray-300 bg-gray-50 p-3 focus:border-indigo-500 focus:ring-indigo-500">
                             <option value="">카테고리 선택</option>
-                            <option value="식비">식비</option>
-                            <option value="교통">교통</option>
-                            <option value="공과금">공과금</option>
-                            <option value="쇼핑">쇼핑</option>
-                            <option value="여가">여가</option>
-                            <option value="의료/건강">의료/건강</option>
-                            <option value="기타">기타</option>
+                            {/* App.js로부터 받은 categories 배열로 option 태그를 생성 */}
+                            {categories.map(cat => (
+                                <option key={cat.id} value={cat.name}>{cat.name}</option>
+                            ))}
                         </select>
                     </div>
                     

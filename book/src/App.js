@@ -32,6 +32,9 @@ function App() {
     const [isMonthlySummaryOpen, setIsMonthlySummaryOpen] = useState(false);
     const [selectedMonthData, setSelectedMonthData] = useState(null);
 
+    //카테고리 변수 
+    const [categories, setCategories] = useState([]); 
+
     // --- 2. Memoized Values (성능 최적화) ---
     const { monthlyDataArray, currentMonthTransactions, monthlyIncome, monthlyExpense } = useMemo(() => {
         const monthlyData = transactions.reduce((acc, tx) => {
@@ -158,6 +161,28 @@ function App() {
         document.body.classList.toggle('dark-mode', isDarkMode);
     }, [isDarkMode]);
     
+    //카테고리 넘기는 함수
+    const fetchCategories = useCallback(async () => {
+        try {
+            const token = localStorage.getItem('authToken');
+            if (!token) return;
+            const response = await axios.get('http://localhost:5000/api/categories', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setCategories(response.data);
+        } catch (error) {
+            console.error("카테고리 로딩 실패:", error);
+        }
+    }, []);
+    
+    // 로그인 했을 때 거래 내역과 카테고리를 함께 불러옴
+    useEffect(() => {
+        if (isLoggedIn) {
+            fetchTransactions();
+            fetchCategories(); // 👈 카테고리 불러오기 호출 추가
+        }
+    }, [isLoggedIn, fetchTransactions, fetchCategories]);
+
     // --- 5. 렌더링 ---
     const showChatbotPages = ['dashboard', 'report', 'settings'];
 
@@ -182,9 +207,9 @@ function App() {
             {currentPage === 'dashboard' && <Dashboard isDarkMode={isDarkMode} transactions={transactions} />}
             {currentPage === 'report' && <ReportPage transactions={currentMonthTransactions} monthlyIncome={monthlyIncome} monthlyExpense={monthlyExpense} isDarkMode={isDarkMode} />}
             {currentPage === 'settings' && <SettingsPage />}
-            {currentPage === 'mypage' && <MyPage user={user} handleLogout={handleLogout} />}
+            {currentPage === 'mypage' && <MyPage user={user} handleLogout={handleLogout} categories={categories} onCategoryUpdate={fetchCategories}  />}
 
-            <TransactionModal isOpen={isModalOpen} onClose={closeModal} onSaveSuccess={fetchTransactions} />
+            <TransactionModal isOpen={isModalOpen} onClose={closeModal} onSaveSuccess={fetchTransactions}  categories={categories} />
             <MonthlyListDialog isOpen={isMonthlyListOpen} onClose={closeMonthlyList} monthlyExpenses={monthlyDataArray} onMonthSelect={openMonthlyDetail} />
             {selectedMonthData && <MonthlySummaryDialog isOpen={isMonthlySummaryOpen} onClose={closeMonthlyDetail} monthlyIncome={selectedMonthData.totalIncome} monthlyExpense={selectedMonthData.totalExpense} />}
             {showChatbotPages.includes(currentPage) && <ChatbotWidget currentPage={currentPage} transactions={transactions} onOpenMonthlySummary={openMonthlyList} userRole={user?.role} />}
