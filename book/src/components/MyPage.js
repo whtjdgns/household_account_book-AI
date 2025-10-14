@@ -199,6 +199,30 @@ function MyPage({ user, handleLogout }) {
                     <button type="submit" className="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">비밀번호 변경</button>
                 </form>
             </Card>
+{/* 
+             {user.provider === 'local' && (
+                <Card>
+                    <h3 className="text-xl font-bold text-gray-800 mb-4">비밀번호 변경</h3>
+                    <form onSubmit={handleChangePassword} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">현재 비밀번호</label>
+                            <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md" />
+                        </div>
+                         <div>
+                            <label className="block text-sm font-medium text-gray-700">새 비밀번호</label>
+                            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md" />
+                        </div>
+                         <div>
+                            <label className="block text-sm font-medium text-gray-700">새 비밀번호 확인</label>
+                            <input type="password" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md" />
+                        </div>
+                        <button type="submit" className="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                            비밀번호 변경
+                        </button>
+                    </form>
+                </Card>
+            )} */}
+            
 
             {/* 회원 탈퇴 카드 */}
             

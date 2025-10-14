@@ -574,6 +574,167 @@ app.get('/api/auth/naver/callback',
   }
 );
 
+// ## 카테고리 관리 API ##
+
+// 카테고리 가져오기
+app.get('/api/categories', async (req, res) => {
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.id;
+        
+        // 기본 카테고리와 해당 사용자가 추가한 카테고리를 모두 조회
+        const sql = 'SELECT * FROM categories WHERE is_default = TRUE OR user_id = ?';
+        const [categories] = await db.query(sql, [userId]);
+        res.status(200).json(categories);
+    } catch (error) {
+        console.error("카테고리 조회 오류:", error);
+        res.status(500).json({ message: '카테고리 조회 중 오류가 발생했습니다.' });
+    }
+});
+
+// 새 카테고리 추가
+app.post('/api/categories', async (req, res) => {
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.id;
+        const { name } = req.body;
+
+        if (!name) {
+            return res.status(400).json({ message: '카테고리 이름을 입력해주세요.' });
+        }
+
+        const sql = 'INSERT INTO categories (user_id, name, is_default) VALUES (?, ?, FALSE)';
+        await db.query(sql, [userId, name]);
+        res.status(201).json({ message: '카테고리가 추가되었습니다.' });
+    } catch (error) {
+        console.error("카테고리 추가 오류:", error);
+        res.status(500).json({ message: '카테고리 추가 중 오류가 발생했습니다.' });
+    }
+});
+
+// 카테고리 삭제
+app.delete('/api/categories/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.id;
+        const categoryId = req.params.id;
+
+        // 본인이 생성한 카테고리만 삭제 가능하도록 user_id와 is_default = FALSE 조건을 추가
+        const sql = 'DELETE FROM categories WHERE id = ? AND user_id = ? AND is_default = FALSE';
+        const [result] = await db.query(sql, [categoryId, userId]);
+
+        if (result.affectedRows === 0) {
+            return res.status(403).json({ message: '삭제 권한이 없거나 존재하지 않는 카테고리입니다.' });
+        }
+        res.status(200).json({ message: '카테고리가 삭제되었습니다.' });
+    } catch (error) {
+        console.error("카테고리 삭제 오류:", error);
+        res.status(500).json({ message: '카테고리 삭제 중 오류가 발생했습니다.' });
+    }
+});
+
+
+
+// 비밀번호 변경 API
+app.post('/api/users/change-password', async (req, res) => {
+    try {
+        // 1. 토큰에서 사용자 ID를 가져옵니다.
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.id;
+
+        const { currentPassword, newPassword } = req.body;
+
+        // 2. 데이터베이스에서 현재 사용자의 암호화된 비밀번호를 가져옵니다.
+        const sqlSelect = 'SELECT password_hash FROM users WHERE id = ?';
+        const [users] = await db.query(sqlSelect, [userId]);
+        
+        if (users.length === 0) {
+            return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
+        }
+        const user = users[0];
+
+        // 3. 입력된 '현재 비밀번호'가 DB의 비밀번호와 일치하는지 확인합니다.
+        const isPasswordCorrect = await bcrypt.compare(currentPassword, user.password_hash);
+        if (!isPasswordCorrect) {
+            return res.status(401).json({ message: '현재 비밀번호가 일치하지 않습니다.' });
+        }
+
+        // 4. '새 비밀번호'를 암호화합니다.
+        const saltRounds = 10;
+        const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+        // 5. 암호화된 새 비밀번호로 데이터베이스를 업데이트합니다.
+        const sqlUpdate = 'UPDATE users SET password_hash = ? WHERE id = ?';
+        await db.query(sqlUpdate, [hashedNewPassword, userId]);
+
+        res.status(200).json({ message: '비밀번호가 성공적으로 변경되었습니다.' });
+
+    } catch (error) {
+        console.error("비밀번호 변경 오류:", error);
+        res.status(500).json({ message: '비밀번호 변경 중 서버 오류가 발생했습니다.' });
+    }
+});
+
+// ## 이메일 인증 API (회원탈퇴용) ##
+app.post('/api/email/send-delete-verification', async (req, res) => {
+    const { email } = req.body;
+    if (!email) {
+        return res.status(400).json({ message: '이메일을 입력해주세요.' });
+    }
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    verificationCodes[email] = code; // 임시 저장소에 인증번호 저장
+
+    try {
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: '[AI 가계부] 회원 탈퇴 인증번호 안내', // 이메일 제목
+            html: `<p>회원 탈퇴를 위한 인증번호입니다: <strong>${code}</strong></p>`,
+        });
+        
+        // 3분 후 인증번호 자동 삭제
+        setTimeout(() => { delete verificationCodes[email]; }, 3 * 60 * 1000);
+
+        res.status(200).json({ message: '인증번호가 발송되었습니다.' });
+    } catch (error) {
+        console.error('이메일 발송 실패(회원탈퇴):', error);
+        res.status(500).json({ message: '인증번호 발송에 실패했습니다.' });
+    }
+});
+
+
+// ## 계정 관리 API (회원 탈퇴) ##
+app.post('/api/users/delete-account', async (req, res) => {
+    try {
+        // 1. 토큰에서 사용자 ID 확인
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.id;
+        
+        const { email, code } = req.body;
+
+        // 2. 이메일 인증 코드가 유효한지 확인
+        if (!(verificationCodes[email] && verificationCodes[email] === code)) {
+             return res.status(400).json({ message: '인증 정보가 유효하지 않습니다.' });
+        }
+        
+        // 3. 데이터베이스에서 사용자 및 관련 데이터 삭제
+        // (ON DELETE CASCADE 설정으로 transactions, categories 데이터도 함께 삭제됨)
+        await db.query('DELETE FROM users WHERE id = ?', [userId]);
+
+        delete verificationCodes[email]; // 사용한 인증 코드 삭제
+        res.status(200).json({ message: '회원 탈퇴가 완료되었습니다.' });
+
+    } catch (error) {
+        console.error("회원 탈퇴 오류:", error);
+        res.status(500).json({ message: '회원 탈퇴 처리 중 오류가 발생했습니다.' });
+    }
+});
 
 
 // 5. 서버 실행
@@ -581,3 +742,4 @@ const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
     console.log(`백엔드 서버가 ${PORT}번 포트에서 실행 중입니다.`);
 });
+

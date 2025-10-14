@@ -5,7 +5,7 @@ function Header({ user, handleLogout, showPage, currentPage, toggleDarkMode, onO
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     
     const userName = user?.name || '사용자';
-
+    
     return (
         <header className="relative flex flex-col md:flex-row justify-between items-center py-4 px-6 mb-6 card">
             <h1 className="text-2xl font-bold text-indigo-600 mb-4 md:mb-0">핀로그</h1>
