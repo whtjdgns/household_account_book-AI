@@ -13,7 +13,7 @@ function ChatbotWidget({ currentPage, transactions, onOpenMonthlySummary, userRo
     const chatContainerRef = useRef(null);
         // ★★★ 1. 관리자 챗봇을 위한 별도의 상태를 추가합니다.
     const [isAdminChatOpen, setIsAdminChatOpen] = useState(false);
-
+    
     // 챗봇 다이얼로그가 열릴 때 첫 메시지 설정
     useEffect(() => {
         if (isChatOpen) {
