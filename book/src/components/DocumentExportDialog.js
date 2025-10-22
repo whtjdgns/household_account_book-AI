@@ -15,7 +15,7 @@ function DocumentExportDialog({ isOpen, onClose, transactions }) {
             '유형': t.type === 'income' ? '수입' : '지출',
             '카테고리': t.category,
             '내용': t.description,
-            '금액': t.amount
+            '금액': Math.round(t.amount)
         }));
         const worksheet = XLSX.utils.json_to_sheet(formattedData);
         const workbook = XLSX.utils.book_new();
@@ -152,7 +152,7 @@ function DocumentExportDialog({ isOpen, onClose, transactions }) {
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{t.category}</td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{t.description}</td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">{t.amount.toLocaleString()}원</td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">{Math.round(t.amount).toLocaleString()}원</td>
                                                 </tr>
                                             ))
                                         ) : (
