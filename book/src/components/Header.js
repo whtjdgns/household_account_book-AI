@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaChartLine, FaExchangeAlt, FaChartPie, FaCog, FaUserCircle, FaSignOutAlt, FaSun, FaMoon } from 'react-icons/fa';
+import { FaChartLine, FaExchangeAlt, FaChartPie, FaUserCircle, FaSignOutAlt, FaSun, FaMoon } from 'react-icons/fa';
 
 function Header({ user, handleLogout, showPage, currentPage, toggleDarkMode, onOpenModal, darkMode }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -8,7 +8,7 @@ function Header({ user, handleLogout, showPage, currentPage, toggleDarkMode, onO
     
     return (
         <header className="relative flex flex-col md:flex-row justify-between items-center py-4 px-6 mb-6 card">
-            <h1 className="text-2xl font-bold text-indigo-600 mb-4 md:mb-0">핀로그</h1>
+            <h1 className="text-2xl font-bold text-indigo-600 mb-4 md:mb-0 font-cinzel">FinLog</h1>
             <nav className="absolute left-1/2 -translate-x-1/2 flex justify-center space-x-4 md:space-x-8">
                 <button type="button" onClick={() => showPage('dashboard')} className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`}>
                     <FaChartLine className="mr-2" />대시보드
@@ -19,9 +19,7 @@ function Header({ user, handleLogout, showPage, currentPage, toggleDarkMode, onO
                 <button type="button" onClick={() => showPage('report')} className={`nav-link ${currentPage === 'report' ? 'active' : ''}`}>
                     <FaChartPie className="mr-2" />보고서
                 </button>
-                {/* <button type="button" onClick={() => showPage('settings')} className={`nav-link ${currentPage === 'settings' ? 'active' : ''}`}>
-                    <FaCog className="mr-2" />설정
-                </button> */}
+
             </nav>
             <div className="flex items-center space-x-4 mt-4 md:mt-0">
                 <span className="text-gray-600 text-sm hidden md:block">환영합니다, {userName}님!</span>  
