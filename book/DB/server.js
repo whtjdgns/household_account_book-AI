@@ -17,6 +17,7 @@ const transactionRoutes = require('./routes/transactions');
 const categoryRoutes = require('./routes/categories');
 const geminiRoutes = require('./routes/gemini');
 const emailRoutes = require('./routes/email');
+const adminChatbotRoutes = require('./routes/admin_chatbot');
 
 // 3. Express 앱 생성 및 기본 설정
 const app = express();
@@ -90,6 +91,7 @@ app.use('/api', geminiRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/email', emailRoutes);
+app.use('/api/admin/chatbot', adminChatbotRoutes);
 
 // 6. 관리자 확인 미들웨어 (현재 사용되지 않음)
 const isAdmin = (req, res, next) => {

@@ -79,6 +79,20 @@ function App() {
         }
     }, []);
 
+    const handleDeleteTransaction = useCallback(async (id) => {
+        try {
+            const token = localStorage.getItem('authToken');
+            if (!token) return;
+            await axios.delete(`http://localhost:5000/api/transactions/${id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            fetchTransactions(); // 삭제 후 거래 내역 다시 불러오기
+        } catch (error) {
+            console.error("거래 내역 삭제 실패:", error);
+            alert('거래 내역 삭제 중 오류가 발생했습니다.'); // 사용자에게 오류 알림
+        }
+    }, [fetchTransactions]);
+
     const onLoginSuccess = () => {
         const token = localStorage.getItem('authToken');
         if (token) {
@@ -204,8 +218,8 @@ function App() {
         <div className={`min-h-screen flex flex-col p-4 md:p-8 ${isDarkMode ? 'dark-mode' : ''}`}>
             <Header user={user} handleLogout={handleLogout} showPage={showPage} toggleDarkMode={toggleDarkMode} currentPage={currentPage} onOpenModal={openModal} darkMode={isDarkMode} />
             
-            {currentPage === 'dashboard' && <Dashboard isDarkMode={isDarkMode} transactions={transactions} />}
-            {currentPage === 'report' && <ReportPage transactions={currentMonthTransactions} monthlyIncome={monthlyIncome} monthlyExpense={monthlyExpense} isDarkMode={isDarkMode} />}
+            {currentPage === 'dashboard' && <Dashboard isDarkMode={isDarkMode} transactions={transactions} onDeleteTransaction={handleDeleteTransaction} />}
+            {currentPage === 'report' && <ReportPage transactions={transactions} monthlyIncome={monthlyIncome} monthlyExpense={monthlyExpense} isDarkMode={isDarkMode} />}
             {currentPage === 'settings' && <SettingsPage />}
             {currentPage === 'mypage' && <MyPage user={user} handleLogout={handleLogout} categories={categories} onCategoryUpdate={fetchCategories}  />}
 

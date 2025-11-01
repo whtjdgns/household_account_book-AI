@@ -116,12 +116,16 @@ const ComparisonDialog = ({ isOpen, onClose, category, userAmount, averageAmount
 };
 
 
-function ReportPage({ transactions = [], monthlyIncome = 0, monthlyExpense = 0, isDarkMode = false }) {
+function ReportPage({ transactions = [], isDarkMode = false }) {
     const barChartRef = useRef(null);
     const barChartInstance = useRef(null);
     const [comparisonData, setComparisonData] = useState(null);
     const [averageAmount, setAverageAmount] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
+
+    // 총 수입과 총 지출 계산
+    const totalIncome = transactions.filter(tx => tx.type === 'income').reduce((acc, tx) => acc + Number(tx.amount), 0);
+    const totalExpense = transactions.filter(tx => tx.type === 'expense').reduce((acc, tx) => acc + Number(tx.amount), 0);
 
     useEffect(() => {
         if (barChartInstance.current) {
@@ -131,11 +135,11 @@ function ReportPage({ transactions = [], monthlyIncome = 0, monthlyExpense = 0, 
         barChartInstance.current = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['월간'],
+                labels: ['전체 기간'], // 라벨 변경
                 datasets: [
                     {
                         label: '총 수입',
-                        data: [monthlyIncome],
+                        data: [totalIncome], // 계산된 총 수입 사용
                         backgroundColor: 'rgba(16, 185, 129, 0.8)',
                         borderColor: 'rgba(16, 185, 129, 1)',
                         borderWidth: 1,
@@ -143,7 +147,7 @@ function ReportPage({ transactions = [], monthlyIncome = 0, monthlyExpense = 0, 
                     },
                     {
                         label: '총 지출',
-                        data: [monthlyExpense],
+                        data: [totalExpense], // 계산된 총 지출 사용
                         backgroundColor: 'rgba(239, 68, 68, 0.8)',
                         borderColor: 'rgba(239, 68, 68, 1)',
                         borderWidth: 1,
@@ -175,7 +179,7 @@ function ReportPage({ transactions = [], monthlyIncome = 0, monthlyExpense = 0, 
                 barChartInstance.current.destroy();
             }
         };
-    }, [monthlyIncome, monthlyExpense, isDarkMode]);
+    }, [totalIncome, totalExpense, isDarkMode]);
 
     const handleCategoryClick = async (category, amount) => {
         setComparisonData({ category, amount });
@@ -237,7 +241,7 @@ function ReportPage({ transactions = [], monthlyIncome = 0, monthlyExpense = 0, 
                         <h3 className="text-xl font-bold mb-4">카테고리별 상세 지출</h3>
                         <div className="space-y-3 overflow-y-auto max-h-96 pr-2">
                             {sortedCategories.length > 0 ? sortedCategories.map(([category, amount]) => {
-                                const percentage = monthlyExpense > 0 ? (amount / monthlyExpense * 100).toFixed(1) : 0;
+                                const percentage = totalExpense > 0 ? (amount / totalExpense * 100).toFixed(1) : 0;
                                 return (
                                     <div 
                                         key={category} 
