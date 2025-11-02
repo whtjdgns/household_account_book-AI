@@ -1,10 +1,7 @@
 {
   "dependencies": {
-<<<<<<< HEAD
     "cors": "^2.8.5",
-=======
     "@google-cloud/vertexai": "^1.10.0",
->>>>>>> 19105ee05003a1c7da3388a78de0cf6418872b87
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0"
   }
