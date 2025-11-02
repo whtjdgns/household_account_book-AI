@@ -25,7 +25,7 @@ function App() {
     const [authPage, setAuthPage] = useState('login');
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [transactions, setTransactions] = useState([]);
-    
+    const cors = require('cors');
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isMonthlyListOpen, setIsMonthlyListOpen] = useState(false);
@@ -34,6 +34,15 @@ function App() {
 
     //카테고리 변수 
     const [categories, setCategories] = useState([]); 
+
+    //aws접속
+    app.use(cors({
+    origin: '*'
+    }));
+
+    app.listen(8080, () => { // EB는 보통 8080 포트를 씁니다.
+    console.log('Server is running!');
+    });
 
     // --- 2. Memoized Values (성능 최적화) ---
     const { monthlyDataArray, currentMonthTransactions, monthlyIncome, monthlyExpense } = useMemo(() => {

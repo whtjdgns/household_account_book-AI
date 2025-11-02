@@ -1,0 +1,9 @@
+aidb.c5o0ymyisa1r.ap-southeast-2.rds.amazonaws.com
+^ 엔드포인트 
+
+ai-db-sg (sg-03434a5be23b4450a)
+보안 sg값 
+
+RDS 비번 dongyang 
+RDS 이름 admin
+DB 이름  aidb
