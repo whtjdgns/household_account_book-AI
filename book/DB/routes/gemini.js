@@ -1,7 +1,7 @@
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const db = require('../db');
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 const fs = require('fs');
 const path = require('path');
 
@@ -15,9 +15,11 @@ async function isDataRequired(message) {
     try {
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
         const prompt = `사용자의 다음 질문에 답변하기 위해 거래 내역 데이터가 필요한가요? '예' 또는 '아니오'로만 답해주세요: "${message}"`;
+        
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const text = response.text().trim();
+
         console.log(`[Chatbot Intent Check] Query: "${message}" -> Needs Data: ${text}`);
         return text.includes('예');
     } catch (error) {
@@ -115,16 +117,13 @@ router.post('/chatbot', async (req, res) => {
             .replace('{dataAnalysisPrompt}', dataAnalysisPrompt)
             .replace('{currentPage}', currentPage);
 
-        const systemInstruction = { parts: [{ text: systemPrompt }] };
-
         const chat = model.startChat({
             history: history,
             generationConfig: { maxOutputTokens: 1000 },
-            systemInstruction: systemInstruction,
         });
 
-        const result = await chat.sendMessage(message);
-        const response = await result.response;
+        const result = await chat.sendMessage(systemPrompt + "\n" + message);
+        const response = result.response;
         const text = response.text();
 
         res.json({ text });
@@ -183,7 +182,7 @@ router.post('/gemini/generate-tips', async (req, res) => {
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
       
         const transactionSummary = transactions
-            .map(t => `${t.transaction_date} - ${t.category}: ${t.description} (${t.type === 'expense' ? '-' : '+'}${t.amount}원)`) // Corrected join to use literal newline
+            .map(t => `${t.transaction_date} - ${t.category}: ${t.description} (${t.type === 'expense' ? '-' : '+'}${t.amount}원)`)
             .join('\n');
 
         const prompt = `
@@ -198,7 +197,7 @@ router.post('/gemini/generate-tips', async (req, res) => {
         `;
     
         const result = await model.generateContent(prompt);
-        const response = await result.response;
+        const response = result.response;
 
         if (response.promptFeedback && response.promptFeedback.blockReason) {
             console.error('AI 프롬프트가 안전 문제로 차단되었습니다:', response.promptFeedback);
@@ -207,7 +206,7 @@ router.post('/gemini/generate-tips', async (req, res) => {
             });
         }
 
-        const text = await response.text();
+        const text = response.text();
         const tipsArray = text.split(/\n?[0-9]+\.\s/).filter(tip => tip.trim().length > 0);
         res.status(200).json({ tips: tipsArray });
 

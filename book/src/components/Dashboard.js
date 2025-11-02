@@ -5,7 +5,7 @@ import Card from './Card';
 import ExpenseChart from './Chart';
 import axios from 'axios';
 
-function Dashboard({ isDarkMode, transactions }) {
+function Dashboard({ isDarkMode, transactions, onDeleteTransaction }) {
 
     const [savingTips, setSavingTips] = useState([]);
     const [currentTipIndex, setCurrentTipIndex] = useState(0);
@@ -40,6 +40,12 @@ function Dashboard({ isDarkMode, transactions }) {
             setLoadingTip(false);
         }
     }, [transactions]);
+
+    const handleDelete = (id) => {
+        if (window.confirm('정말로 이 거래 내역을 삭제하시겠습니까?')) {
+            onDeleteTransaction(id);
+        }
+    };
 
     const showNextTip = () => {
         setCurrentTipIndex(prevIndex => (prevIndex + 1) % savingTips.length);
@@ -156,9 +162,12 @@ function Dashboard({ isDarkMode, transactions }) {
                                             <p className="font-medium text-gray-700">{t.description}</p>
                                             <p className="text-gray-500">{new Date(t.transaction_date).toLocaleDateString()}</p>
                                         </div>
-                                        <span className={t.type === 'income' ? 'text-green-500' : 'text-red-500'}>
-                                            {t.type === 'income' ? '+' : '-'}{new Intl.NumberFormat('ko-KR').format(t.amount)}원
-                                        </span>
+                                        <div className="flex items-center">
+                                            <span className={`mr-4 ${t.type === 'income' ? 'text-green-500' : 'text-red-500'}`}>
+                                                {t.type === 'income' ? '+' : '-'}{new Intl.NumberFormat('ko-KR').format(t.amount)}원
+                                            </span>
+                                            <button onClick={() => handleDelete(t.id)} className="text-red-500 hover:text-red-700 z-10 p-2">×</button>
+                                        </div>
                                     </li>
                                 )) 
                             ) : (

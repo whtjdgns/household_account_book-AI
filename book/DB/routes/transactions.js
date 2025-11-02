@@ -88,4 +88,34 @@ router.get('/average/:category', async (req, res) => {
     }
 });
 
+router.delete('/:id', async (req, res) => {
+    console.log('DELETE /api/transactions/:id called with id:', req.params.id);
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: '인증 토큰이 없습니다.' });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.id;
+        const transactionId = req.params.id;
+
+        const sql = 'DELETE FROM transactions WHERE id = ? AND user_id = ?';
+        const [result] = await db.query(sql, [transactionId, userId]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: '해당 거래 내역을 찾을 수 없거나 삭제할 권한이 없습니다.' });
+        }
+
+        res.status(200).json({ message: '거래가 성공적으로 삭제되었습니다.' });
+
+    } catch (error) {
+        console.error(error);
+        if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+            return res.status(401).json({ message: '유효하지 않은 토큰입니다.' });
+        }
+        res.status(500).json({ message: '서버 에러가 발생했습니다.' });
+    }
+});
+
 module.exports = router;
