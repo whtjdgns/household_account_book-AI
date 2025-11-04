@@ -25,13 +25,7 @@ function App() {
     const [authPage, setAuthPage] = useState('login');
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [transactions, setTransactions] = useState([]);
-<<<<<<< HEAD
     
-    //AWS 사용변수 
-   // const cors = require('cors');
-=======
-    const cors = require('cors');
->>>>>>> d7bb45adef1e0575281efa4a884af58e4131dd84
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isMonthlyListOpen, setIsMonthlyListOpen] = useState(false);
@@ -40,6 +34,15 @@ function App() {
 
     //카테고리 변수 
     const [categories, setCategories] = useState([]); 
+
+    //aws접속
+    //app.use(cors({
+    //origin: '*'
+    //}));
+
+    //app.listen(8080, () => { // EB는 보통 8080 포트를 씁니다.
+    //console.log('Server is running!');
+    //}); 
 
 <<<<<<< HEAD
     //AWS 
