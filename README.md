@@ -1,10 +1,10 @@
 # Team_Unnamed
 
-
+ <p align="center"> <img src="readme_images/main name.png" width="700" height="400"> </p>
 
 ## 프로젝트 개요
 
-
+ <img src="readme_images/purpose.png" width="700" height="400">
 
 ## 개발 환경
 
@@ -46,19 +46,21 @@
 
 ## 시스템 구성도
 
-
+  <img src="readme_images/architecture.png" width="700" height="400">
 
 ## ERD
 
-
+ <img src="readme_images/erd.png" width="700" height="400">
 
 ## 주요 기능
 
-
+ <img src="readme_images/AIchatbot.png" width="700" height="400"> <br>
+ <img src="readme_images/documen.png" width="700" height="400"> <br>
+ <img src="readme_images/Psettings.png" width="700" height="400">
 
 ## 🧑‍🎨 팀원 
 
 | **조성훈** | **이문규** | **신승완** |
 |---|---|---|
-| <img src="" width="140" height="130"> | <img src="" width="140" height="130"> | <img src="" width="140" height="130"> |
+| <img src="readme_images/cho.png" width="140" height="130"> | <img src="readme_images/lee.png" width="140" height="130"> | <img src="readme_images/sin.png" width="140" height="130"> |
 | (팀장)프론트엔드, 백엔드 | 프론트엔드, 백엔드 | 백엔드 |
