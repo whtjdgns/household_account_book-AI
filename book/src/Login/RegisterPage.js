@@ -44,7 +44,7 @@ function RegisterPage({ onSwitchToLogin }) {
         setIsLoading(true);
         setError('');
         try {
-            const response = await axios.post('http://localhost:5000/api/email/send-verification', { email: verificationEmail });
+            const response = await axios.post('/api/email/send-verification', { email: verificationEmail });
             alert(response.data.message);
             setIsCodeSent(true);
             setTimer(180); // 3분 타이머 시작
@@ -59,7 +59,7 @@ function RegisterPage({ onSwitchToLogin }) {
         setIsLoading(true);
         setError('');
         try {
-            const response = await axios.post('http://localhost:5000/api/email/verify-code', { email: verificationEmail, code: verificationCode });
+            const response = await axios.post('/api/email/verify-code', { email: verificationEmail, code: verificationCode });
             alert(response.data.message);
             setIsVerified(true);
             setTimer(0); // 인증 성공 시 타이머 중지
@@ -76,7 +76,7 @@ function RegisterPage({ onSwitchToLogin }) {
         if (!isFormValid) return setError('모든 필수 항목을 입력하고 약관에 동의해주세요.');
         if (password !== confirmPassword) return setError('비밀번호가 일치하지 않습니다.');
         try {
-            const response = await axios.post('http://localhost:5000/api/users/register', { name, username: email, password });
+            const response = await axios.post('/api/users/register', { name, username: email, password });
             alert(response.data.message);
             onSwitchToLogin();
         } catch (err) {
@@ -177,7 +177,7 @@ function RegisterPage({ onSwitchToLogin }) {
 
                 
                 {/* <div className="space-y-4">
-                    <a href="http://localhost:5000/api/auth/google" 
+                    <a href="/api/auth/google" 
                 className="w-full py-3 px-4 flex justify-center items-center bg-[#EA4335] ...">
     
                     <button className="w-full py-3 px-4 flex justify-center items-center bg-[#EA4335] text-white font-bold rounded-md hover:bg-[#d93025]">
@@ -186,7 +186,7 @@ function RegisterPage({ onSwitchToLogin }) {
                     </button>
                 </a>
                      
-                   <a href="http://localhost:5000/api/auth/naver"
+                   <a href="/api/auth/naver"
                          className="w-full py-3 px-4 flex justify-center items-center bg-[#03C75A] ..."
                             >
                          <button className="w-full py-3 px-4 flex justify-center items-center bg-[#03C75A] text-white font-bold rounded-md hover:bg-[#02b350]">

@@ -12,7 +12,7 @@ function LoginPage({ onLoginSuccess, onSwitchToRegister }) {
         setError('');
         try {
             // 백엔드의 로그인 API 호출
-            const response = await axios.post('http://localhost:5000/api/users/login', {
+            const response = await axios.post('/api/users/login', {
                 username: email, // 아이디를 이메일로 사용
                 password
             });
@@ -51,7 +51,7 @@ function LoginPage({ onLoginSuccess, onSwitchToRegister }) {
                 </div>
                 <div className="space-y-4">
                     <a 
-                    href="http://localhost:5000/api/auth/google" 
+                    href="/api/auth/google" 
                     className="w-full py-3 px-4 flex justify-center items-center 
                     bg-white text-gray-800 font-bold rounded-md 
                     border border-blue-500 
@@ -66,7 +66,7 @@ function LoginPage({ onLoginSuccess, onSwitchToRegister }) {
                     구글 로그인 및 회원가입
                         </a>
                     
-                   <a href="http://localhost:5000/api/auth/naver"
+                   <a href="/api/auth/naver"
                          className="w-full py-3 px-4 flex justify-center items-center rounded-md bg-[#03C75A] ..."
                             >
                          <button className="w-full py-0 px-4 flex justify-center items-center bg-[#03C75A] text-white font-bold rounded-full hover:bg-[#02b350]">

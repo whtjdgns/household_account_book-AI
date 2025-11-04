@@ -1,8 +1,8 @@
 // server.js
 
 // 1. 필요한 라이브러리들을 모두 불러옵니다.
-const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+const path = require('path'); // dotenv를 먼저 불러옵니다.
+require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 const express = require('express');
 const cors = require('cors');
 const db = require('./db'); // 데이터베이스 연결 모듈
@@ -93,8 +93,18 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/email', emailRoutes);
 app.use('/api/admin/chatbot', adminChatbotRoutes);
 
-// 6. 관리자 확인 미들웨어 (현재 사용되지 않음)
-const isAdmin = (req, res, next) => {
+// 6. React 빌드 파일 서빙 설정
+// 'book/build' 폴더의 정적 파일들을 / 경로로 서비스합니다.
+app.use(express.static(path.join(__dirname, '..', 'build')));
+
+// API 요청이 아닌 모든 GET 요청에 대해 index.html 파일을 서빙합니다.
+// 이를 통해 React Router가 클라이언트 사이드 라우팅을 처리할 수 있습니다.
+app.get('/*', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'build', 'index.html'));
+});
+
+// 7. 관리자 확인 미들웨어 (현재 사용되지 않음)
+const isAdmin = (req, res, next) => { // 이 미들웨어는 admin_chatbot.js 로 이동하는 것이 좋습니다.
     try {
         const token = req.headers.authorization.split(' ')[1];
         if (!token) {
@@ -111,8 +121,8 @@ const isAdmin = (req, res, next) => {
     }
 };
 
-// 7. 서버 실행
-const PORT = process.env.PORT || 5000;
+// 8. 서버 실행
+const PORT = process.env.PORT || 80; // EB 환경 포트 또는 80번 포트
 const server = app.listen(PORT, () => {
     console.log(`백엔드 서버가 ${PORT}번 포트에서 실행 중입니다.`);
 });

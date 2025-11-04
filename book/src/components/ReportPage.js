@@ -190,7 +190,7 @@ function ReportPage({ transactions = [], isDarkMode = false }) {
                 alert('로그인이 필요합니다. 다시 로그인해주세요.');
                 throw new Error('인증 토큰이 없습니다.');
             }
-            const response = await fetch(`http://localhost:5000/api/transactions/average/${encodeURIComponent(category)}`,
+            const response = await fetch(`/api/transactions/average/${encodeURIComponent(category)}`,
             {
                 headers: {
                     'Authorization': `Bearer ${token}`

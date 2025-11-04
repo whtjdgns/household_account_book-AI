@@ -23,7 +23,7 @@ function Dashboard({ isDarkMode, transactions, onDeleteTransaction }) {
 
         try {
             // 백엔드 API에 절약 팁 생성을 요청합니다.
-            const response = await axios.post('http://localhost:5000/api/gemini/generate-tips', {
+            const response = await axios.post('/api/gemini/generate-tips', {
                 transactions: transactions
             });
 

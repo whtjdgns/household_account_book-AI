@@ -23,7 +23,7 @@ function TransactionModal({ isOpen, onClose, onSaveSuccess, categories = []  }) 
                 setIsSuggesting(true);
                 try {
                     const token = localStorage.getItem('authToken'); // 👈 토큰 가져오기
-                    const response = await axios.post('http://localhost:5000/api/gemini/suggest-category', {
+                    const response = await axios.post('/api/gemini/suggest-category', {
                     description: description
                 }, {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -33,7 +33,7 @@ function TransactionModal({ isOpen, onClose, onSaveSuccess, categories = []  }) 
                     setCategory(response.data.suggestedCategory);
                 }
 
-                    // const response = await axios.post('http://localhost:5000/api/gemini/suggest-category', {
+                    // const response = await axios.post('/api/gemini/suggest-category', {
                     //     description: description
                     // });
                     // if (response.data.suggestedCategory) {
@@ -77,7 +77,7 @@ function TransactionModal({ isOpen, onClose, onSaveSuccess, categories = []  }) 
         setError('');
         try {
             const token = localStorage.getItem('authToken');
-            await axios.post('http://localhost:5000/api/transactions', {
+            await axios.post('/api/transactions', {
                 type: transactionType,
                 amount: Number(amount),
                 description: description,

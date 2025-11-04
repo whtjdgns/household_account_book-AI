@@ -25,7 +25,13 @@ function App() {
     const [authPage, setAuthPage] = useState('login');
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [transactions, setTransactions] = useState([]);
+<<<<<<< HEAD
     
+    //AWS 사용변수 
+   // const cors = require('cors');
+=======
+    const cors = require('cors');
+>>>>>>> d7bb45adef1e0575281efa4a884af58e4131dd84
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isMonthlyListOpen, setIsMonthlyListOpen] = useState(false);
@@ -35,6 +41,22 @@ function App() {
     //카테고리 변수 
     const [categories, setCategories] = useState([]); 
 
+<<<<<<< HEAD
+    //AWS 
+    // app.use(cors({
+    // origin: '*'
+    // }));
+=======
+    //aws접속
+    //app.use(cors({
+    //origin: '*'
+    //}));
+
+    //app.listen(8080, () => { // EB는 보통 8080 포트를 씁니다.
+    //console.log('Server is running!');
+    //}); 
+
+>>>>>>> d7bb45adef1e0575281efa4a884af58e4131dd84
     // --- 2. Memoized Values (성능 최적화) ---
     const { monthlyDataArray, currentMonthTransactions, monthlyIncome, monthlyExpense } = useMemo(() => {
         const monthlyData = transactions.reduce((acc, tx) => {
@@ -70,7 +92,7 @@ function App() {
         try {
             const token = localStorage.getItem('authToken');
             if (!token) return;
-            const response = await axios.get('http://localhost:5000/api/transactions', {
+            const response = await axios.get('/api/transactions', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             setTransactions(response.data);
@@ -83,7 +105,7 @@ function App() {
         try {
             const token = localStorage.getItem('authToken');
             if (!token) return;
-            await axios.delete(`http://localhost:5000/api/transactions/${id}`, {
+            await axios.delete(`/api/transactions/${id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             fetchTransactions(); // 삭제 후 거래 내역 다시 불러오기
@@ -180,7 +202,7 @@ function App() {
         try {
             const token = localStorage.getItem('authToken');
             if (!token) return;
-            const response = await axios.get('http://localhost:5000/api/categories', {
+            const response = await axios.get('/api/categories', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             setCategories(response.data);

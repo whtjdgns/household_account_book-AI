@@ -55,7 +55,7 @@ function ChatbotWidget({ currentPage, transactions, onOpenMonthlySummary, userRo
 
         try {
             const token = localStorage.getItem('authToken');
-            const response = await fetch('http://localhost:5000/api/chatbot', { // 일반 챗봇 API
+            const response = await fetch('/api/chatbot', { // 일반 챗봇 API
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ function ChatbotWidget({ currentPage, transactions, onOpenMonthlySummary, userRo
             const token = localStorage.getItem('authToken');
             
             // ★★★ 백엔드 /command API 호출 (경로는 백엔드 설정에 맞게 조정하세요)
-            const response = await fetch('http://localhost:5000/api/admin/chatbot/command', { 
+            const response = await fetch('/api/admin/chatbot/command', { 
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

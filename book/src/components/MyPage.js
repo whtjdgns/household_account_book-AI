@@ -30,7 +30,7 @@ function MyPage({ user, handleLogout, categories = [], onCategoryUpdate }) {
     //     const fetchCategories = async () => {
     //         try {
     //             const token = localStorage.getItem('authToken');
-    //             const response = await axios.get('http://localhost:5000/api/categories', {
+    //             const response = await axios.get('/api/categories', {
     //                 headers: { 'Authorization': `Bearer ${token}` }
     //             });
     //             setCategories(response.data);
@@ -52,7 +52,7 @@ function MyPage({ user, handleLogout, categories = [], onCategoryUpdate }) {
         }
         try {
             const token = localStorage.getItem('authToken');
-            const response = await axios.post('http://localhost:5000/api/users/change-password', 
+            const response = await axios.post('/api/users/change-password', 
                 { currentPassword, newPassword },
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );
@@ -73,12 +73,12 @@ function MyPage({ user, handleLogout, categories = [], onCategoryUpdate }) {
         setMessage('');
         try {
             const token = localStorage.getItem('authToken');
-            await axios.post('http://localhost:5000/api/categories', 
+            await axios.post('/api/categories', 
                 { name: newCategory },
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );
             // 카테고리 목록 다시 불러오기
-            const response = await axios.get('http://localhost:5000/api/categories', {
+            const response = await axios.get('/api/categories', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             //setCategories(response.data);
@@ -95,7 +95,7 @@ function MyPage({ user, handleLogout, categories = [], onCategoryUpdate }) {
         if (window.confirm('정말로 이 카테고리를 삭제하시겠습니까?')) {
             try {
                 const token = localStorage.getItem('authToken');
-                await axios.delete(`http://localhost:5000/api/categories/${categoryId}`, {
+                await axios.delete(`/api/categories/${categoryId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 // 화면에서 삭제된 카테고리 제거
@@ -111,8 +111,8 @@ function MyPage({ user, handleLogout, categories = [], onCategoryUpdate }) {
         setError('');
         setMessage('');
         try {
-             await axios.post('http://localhost:5000/api/email/send-delete-verification', { email: user.username });
-             //await axios.post('http://localhost:5000/api/email/send-verification', { email: user.username });
+             await axios.post('/api/email/send-delete-verification', { email: user.username });
+             //await axios.post('/api/email/send-verification', { email: user.username });
              setMessage('인증번호가 발송되었습니다. 이메일을 확인해주세요.');
              setIsDeleteCodeSent(true);
         } catch(err) {
@@ -126,7 +126,7 @@ function MyPage({ user, handleLogout, categories = [], onCategoryUpdate }) {
      if (window.confirm('정말로 회원 탈퇴를 진행하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
         try {
             const token = localStorage.getItem('authToken');
-            const response = await axios.post('http://localhost:5000/api/users/delete-account', 
+            const response = await axios.post('/api/users/delete-account', 
                 { email: user.username, code: deleteCode },
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );
