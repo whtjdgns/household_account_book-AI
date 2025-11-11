@@ -68,11 +68,3 @@
 |---|---|---|
 | <img src="readme_images/cho.png" width="140" height="130"> | <img src="readme_images/lee.png" width="140" height="130"> | <img src="readme_images/sin.png" width="140" height="130"> |
 | (팀장)프론트엔드, 백엔드 | 프론트엔드, 백엔드 | 백엔드 |
-
-## 포스터 PPT
-
-<p align="center"> <img src="readme_images/poster_ppt.png"> </p>
-
-## 브로셔
-
-<p align="center"> <img src="readme_images/brosher.png" width="700" height="400"> </p>
