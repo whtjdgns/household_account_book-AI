@@ -58,6 +58,11 @@
  <img src="readme_images/documen.png" width="700" height="400"> <br>
  <img src="readme_images/Psettings.png" width="700" height="400">
 
+## 시연 동영상
+
+<a href="https://youtu.be/zG9_g3QvObo">영상 링크</a>
+ 
+
 ## 🧑‍🎨 팀원 
 
 | **조성훈** | **이문규** | **신승완** |
