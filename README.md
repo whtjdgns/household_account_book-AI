@@ -60,7 +60,7 @@
 
 ## 시연 동영상
 
-<a href="https://youtu.be/zG9_g3QvObo">영상 링크</a>
+<a href="https://youtu.be/Sih6PEE8yo8">영상 링크</a>
  
 ## 🧑‍🎨 팀원 
 
